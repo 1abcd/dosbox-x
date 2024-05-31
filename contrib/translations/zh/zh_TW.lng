@@ -3219,7 +3219,7 @@ DOSBox-X 支援
 偵錯工具選項: 監看執行方式
 .
 :MENU:video_debug_overlay
-重疊影像偵錯畫面
+覆疊影像偵錯畫面
 .
 :MENU:HelpCommandMenu
 DOS 命令
