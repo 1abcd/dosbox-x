@@ -2612,10 +2612,16 @@ public:
         }
 
         /* NTS: Load address is 128KB - sector size */
-        if (loadseg_user > 0) /* Some PC-98 games have floppy boot code that suggests the boot segment isn't always 0x1FC0 like PC-9821 hardware does? */
+        if (loadseg_user > 0) { /* Some PC-98 games have floppy boot code that suggests the boot segment isn't always 0x1FC0 like PC-9821 hardware does? */
             load_seg=(unsigned int)loadseg_user;
-        else
-            load_seg=IS_PC98_ARCH ? (0x2000 - (bootsize/16U)) : 0x07C0;
+        }
+        else {
+            unsigned int max_seg = std::min((unsigned int)(MEM_TotalPages()*(4096u/16u)/*pages to paragraphs*/),0xC000u);
+            if (IS_PC98_ARCH)
+                load_seg=std::min(max_seg,0x2000u/*128KB mark*/) - (bootsize/16U); /* normally 0x1FC0 (1024 byte/sector) or 0x1FE0 (512 byte/sector) */
+            else
+                load_seg=std::min(max_seg,0x800u/*32KB mark*/) - 0x40u/*1KB*/; /* normally 0x07C0 */
+        }
 
         if (!has_read) {
             if (imageDiskList[drive - 65]->Read_Sector(0, 0, 1, (uint8_t *)&bootarea) != 0) {
@@ -2829,12 +2835,7 @@ public:
         } else {
             extern const char* RunningProgram;
 
-            if (max_seg < 0x0800) {
-                /* TODO: For the adventurous, add a configuration option or command line switch to "BOOT"
-                 *       that allows us to boot the guest OS anyway in a manner that is non-standard. */
-                if (!quiet) WriteOut("32KB of RAM is required to boot a guest OS\n");
-                return;
-            }
+            if (max_seg < (IS_PC98_ARCH?0x2000:0x0800)) LOG(LOG_MISC,LOG_WARN)("Booting a guest OS with too small amount of RAM may not work correctly");
 
             /* Other versions of MS-DOS/PC-DOS have their own requirements about memory:
              *    - IBM PC-DOS 1.0/1.1: not too picky, will boot with as little as 32KB even though
@@ -6109,7 +6110,21 @@ class IMGMOUNT : public Program {
 				return false;
 			}
 
+			for (auto i=options.begin();i!=options.end();i++) {
+				if ((*i) == "int13") {
+					char buf[32];
+
+					if (drive >= 'C')
+						sprintf(buf,"=%u",drive+0x80-'C');
+					else
+						sprintf(buf,"=%u",drive-'A');
+
+					(*i) += buf;
+				}
+			}
+
 			bool imgsizedetect = isHardDrive && sizes[0] == 0;
+			int mediaid = -1;
 
 			std::vector<DOS_Drive*> imgDisks;
 			std::vector<std::string>::size_type i;
@@ -6268,6 +6283,7 @@ class IMGMOUNT : public Program {
 							errorMessage = ver_msg;
 						}
 					} else {
+						if (imgDisks.size() == 1) mediaid = (int)((unsigned char)fdrive->GetMediaByte());
 						if ((vhdImage&&ro)||roflag) fdrive->readonly=true;
 					}
 					unformatted = fdrive->unformatted;
@@ -6281,7 +6297,7 @@ class IMGMOUNT : public Program {
 				}
 			}
 
-			AddToDriveManager(drive, imgDisks, isHardDrive ? 0xF8 : 0xF0);
+			AddToDriveManager(drive, imgDisks, (mediaid >= 0xF0) ? mediaid : (isHardDrive ? 0xF8 : 0xF0));
 			DOS_EnableDriveMenu(drive);
 
 			std::string tmp(wpcolon&&paths[0].length()>1&&paths[0].c_str()[0]==':'?paths[0].substr(1):paths[0]);
@@ -6327,6 +6343,13 @@ class IMGMOUNT : public Program {
 							}
 						}
 					}
+				}
+
+				/* now that the image is attached to INT 13h the INT 13 image can use it now */
+				if (image->class_id == imageDisk::ID_INT13) {
+					imageDiskINT13Drive *x = (imageDiskINT13Drive*)image;
+					x->enable_int13 = true;
+					LOG_MSG("INT 13 image enabling calling");
 				}
 			}
 			return true;
@@ -9296,6 +9319,8 @@ void Add_VFiles(bool usecp) {
     /* MEM.COM is not compatible with PC-98 and/or 8086 emulation */
     if(!IS_PC98_ARCH && CPU_ArchitectureType >= CPU_ARCHTYPE_80186)
         VFILE_RegisterBuiltinFileBlob(bfb_MEM_EXE, "/DOS/");
+    else if(IS_PC98_ARCH || CPU_ArchitectureType < CPU_ARCHTYPE_80186)
+        VFILE_RegisterBuiltinFileBlob(bfb_MEM_EXE_PC98, "/DOS/");
 
     VFILE_RegisterBuiltinFileBlob(bfb_CWSDPMI_EXE, "/BIN/");
     /* DSXMENU.EXE */
@@ -9329,6 +9354,30 @@ void Add_VFiles(bool usecp) {
 	VFILE_RegisterBuiltinFileBlob(bfb_EGA2_CPX, "/CPI/");
 	VFILE_RegisterBuiltinFileBlob(bfb_EGA_CPX, "/CPI/");
 }
+
+#if WIN32
+void Add_Existing_Drive_Directories()
+{
+    for(auto drive = 'C'; drive < 'Y'; drive++)
+    {
+        auto name = std::string("drive");
+        auto path = std::string(".");
+
+        name += drive;
+        path += CROSS_FILESPLIT;
+        path += name;
+
+        getdrivezpath(path, name);
+
+        if (path.empty())
+            continue;
+
+        LOG_MSG("Mounting directory 'drive%c' found in DOSBox-X directory as drive %c.\n", static_cast<char>(drive + 32), drive);
+
+        MountHelper(drive, path.c_str(), "LOCAL");
+    }
+}
+#endif
 
 void DOS_SetupPrograms(void) {
     /*Add Messages */
@@ -9860,4 +9909,10 @@ void DOS_SetupPrograms(void) {
 
     /*regular setup*/
     Add_VFiles(false);
+
+#if WIN32
+    if (dos_section->Get_bool("automount drive directories")) {
+        Add_Existing_Drive_Directories();
+    }
+#endif
 }

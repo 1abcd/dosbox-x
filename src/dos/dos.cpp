@@ -228,7 +228,6 @@ void DOS_HMA_CLAIMED(uint16_t bytes) {
 
 uint16_t DOS_INFOBLOCK_SEG=0x80;	// sysvars (list of lists)
 uint16_t DOS_CONDRV_SEG=0xa0;
-uint16_t DOS_CONSTRING_SEG=0xa8;
 uint16_t DOS_SDA_SEG=0xb2;		// dos swappable area
 uint16_t DOS_SDA_SEG_SIZE=0x560;  // WordPerfect 5.1 consideration (emendelson)
 uint16_t DOS_SDA_OFS=0;
@@ -1029,7 +1028,7 @@ static Bitu DOS_21Handler(void) {
         real_writew(SegValue(ss), reg_sp - 2, SegValue(es));
     }
 
-    if (reg_ah == 0x06) {
+    if (reg_ah == 0x06 || reg_ah == 0x07) {
         /* does not check CTRL+BREAK. Some DOS programs do not expect to be interrupted with INT 23h if they read */
         /* keyboard input through this and may cause system instability if terminated. This fixes PC-98 text editor
          * VZ.EXE which will leave it's INT 6h handler in memory if interrupted this way, for example. */
@@ -4046,28 +4045,36 @@ public:
 			}
 		}
 
-        ::disk_data_rate = section->Get_int("hard drive data rate limit");
-        ::floppy_data_rate = section->Get_int("floppy drive data rate limit");
-        if (::disk_data_rate < 0) {
-            if (pcibus_enable)
-                ::disk_data_rate = 8333333; /* Probably an average IDE data rate for mid 1990s PCI IDE controllers in PIO mode */
-            else
-                ::disk_data_rate = 3500000; /* Probably an average IDE data rate for early 1990s ISA IDE controllers in PIO mode */
-        }
-        if(::floppy_data_rate < 0) {
-            ::floppy_data_rate = 22400; // 175 kbps
-        }
-        std::string prefix = section->Get_string("special operation file prefix");
-        if (prefix.size()) prefix_local = prefix + prefix_local.substr(3), prefix_overlay = prefix + prefix_overlay.substr(3);
+		::disk_data_rate = section->Get_int("hard drive data rate limit");
+		::floppy_data_rate = section->Get_int("floppy drive data rate limit");
+		if (::disk_data_rate < 0) {
+			if (pcibus_enable)
+				::disk_data_rate = 8333333; /* Probably an average IDE data rate for mid 1990s PCI IDE controllers in PIO mode */
+			else
+				::disk_data_rate = 3500000; /* Probably an average IDE data rate for early 1990s ISA IDE controllers in PIO mode */
+		}
+		if(::floppy_data_rate < 0) {
+			::floppy_data_rate = 22400; // 175 kbps
+		}
+		std::string prefix = section->Get_string("special operation file prefix");
+		if (prefix.size()) prefix_local = prefix + prefix_local.substr(3), prefix_overlay = prefix + prefix_overlay.substr(3);
 
 		maxfcb=100;
 		DOS_FILES=200;
 		Section_prop *config_section = static_cast<Section_prop *>(control->GetSection("config"));
 		if (config_section != NULL && !control->opt_noconfig && !control->opt_securemode && !control->SecureMode()) {
 			DOS_FILES = (unsigned int)config_section->Get_int("files");
+			if (DOS_FILES==0) {
+				const unsigned int sz = std::min((unsigned int)MEM_TotalPages(),0xA0u);
+				DOS_FILES=5u + ((200u - 5u) * sz) / 0xA0u;
+			}
 			if (DOS_FILES<8) DOS_FILES=8;
 			else if (DOS_FILES>255) DOS_FILES=255;
 			maxfcb = (int)config_section->Get_int("fcbs");
+			if (maxfcb==0) {
+				const unsigned int sz = std::min((unsigned int)MEM_TotalPages(),0xA0u);
+				maxfcb=5u + ((100u - 5u) * sz) / 0xA0u;
+			}
 			if (maxfcb<1) maxfcb=1;
 			else if (maxfcb>255) maxfcb=255;
 			char *dosopt = (char *)config_section->Get_string("dos"), *r=strchr(dosopt, ',');
@@ -4098,6 +4105,7 @@ public:
 				SetNumLock();
 #endif
 		}
+		LOG(LOG_MISC,LOG_DEBUG)("files=%u fcbs=%u",(unsigned int)DOS_FILES,(unsigned int)maxfcb);
         char *r;
 #if defined(WIN32)
         unsigned int cp = GetACP();
@@ -4231,6 +4239,14 @@ public:
         else
             cpm_compat_mode = CPM_COMPAT_OFF;
 
+        /* If memsize < 16KB then the only way DOS can work properly is to allocate in the UMB private area */
+        if (MEM_TotalPages() < 4) {
+            if (!private_always_from_umb) {
+                private_always_from_umb = true;
+                LOG(LOG_MISC,LOG_DEBUG)("Memory size < 16KB, allocating all DOS kernel structures in the private upper memory area");
+            }
+        }
+
         /* FIXME: Boot up an MS-DOS system and look at what INT 21h on Microsoft's MS-DOS returns
          *        for SDA size and location, then use that here.
          *
@@ -4275,7 +4291,7 @@ public:
         if (private_always_from_umb) {
             DOS_GetMemory_Choose(); /* the pool starts in UMB */
             if (minimum_mcb_segment == 0)
-                DOS_MEM_START = IS_PC98_ARCH ? 0x80 : 0x70; /* funny behavior in some games suggests the MS-DOS kernel loads a bit higher on PC-98 */
+                DOS_MEM_START = IS_PC98_ARCH ? 0x80 : (MEM_TotalPages() >= 0x10/*64KB or more*/ ? 0x70 : 0x60); /* funny behavior in some games suggests the MS-DOS kernel loads a bit higher on PC-98 */
             else
                 DOS_MEM_START = minimum_mcb_segment;
 
@@ -4292,7 +4308,7 @@ public:
         }
         else {
             if (minimum_dos_initial_private_segment == 0)
-                DOS_PRIVATE_SEGMENT = IS_PC98_ARCH ? 0x80 : 0x70; /* funny behavior in some games suggests the MS-DOS kernel loads a bit higher on PC-98 */
+                DOS_PRIVATE_SEGMENT = IS_PC98_ARCH ? 0x80 : (MEM_TotalPages() >= 0x10/*64KB or more*/ ? 0x70 : 0x60); /* funny behavior in some games suggests the MS-DOS kernel loads a bit higher on PC-98 */
             else
                 DOS_PRIVATE_SEGMENT = minimum_dos_initial_private_segment;
 
@@ -4310,37 +4326,35 @@ public:
         LOG(LOG_DOSMISC,LOG_DEBUG)("DOS kernel structures will be allocated from pool 0x%04x-0x%04x",
                 DOS_PRIVATE_SEGMENT,DOS_PRIVATE_SEGMENT_END-1);
 
-        DOS_IHSEG = DOS_GetMemory(1,"DOS_IHSEG");
+	DOS_IHSEG = DOS_GetMemory(1,"DOS_IHSEG");
 
-        /* DOS_INFOBLOCK_SEG contains the entire List of Lists, though the INT 21h call returns seg:offset with offset nonzero */
+	/* DOS_INFOBLOCK_SEG contains the entire List of Lists, though the INT 21h call returns seg:offset with offset nonzero */
 	/* NTS: DOS_GetMemory() allocation sizes are in PARAGRAPHS (16-byte units) not bytes */
-	/* NTS: DOS_INFOBLOCK_SEG must be 0x20 paragraphs, CONDRV_SEG 0x08 paragraphs, and CONSTRING_SEG 0x0A paragraphs.
-	 *      The total combined size of INFOBLOCK+CONDRV+CONSTRING must be 0x32 paragraphs.
-	 *      SDA_SEG must be located at INFOBLOCK_SEG+0x32, so that the current PSP segment parameter is exactly at
-	 *      memory location INFOBLOCK_SEG:0x330. The reason for this has to do with Microsoft "Genuine MS-DOS detection"
-	 *      code in QuickBasic 7.1 and other programs designed to thwart DR-DOS at the time.
+	/* NTS: DOS_INFOBLOCK_SEG must be 0x32 paragraphs. SDA_SEG must be located at INFOBLOCK_SEG+0x32, so that the current PSP
+	 *      segment parameter is exactly at memory location INFOBLOCK_SEG:0x330. The reason for this has to do with Microsoft
+	 *      "Genuine MS-DOS detection" code in QuickBasic 7.1 and other programs designed to thwart DR-DOS at the time.
 	 *
 	 *      This is probably why DOSBox SVN hardcoded segments in the first place.
 	 *
 	 *      See also:
 	 *
 	 *      [https://www.os2museum.com/wp/how-to-void-your-valuable-warranty/]
-         *      [https://www.os2museum.com/files/drdos_detect.txt]
-         *      [https://www.os2museum.com/wp/about-that-warranty/]
-         *      [https://github.com/joncampbell123/dosbox-x/issues/3626]
+	 *      [https://www.os2museum.com/files/drdos_detect.txt]
+	 *      [https://www.os2museum.com/wp/about-that-warranty/]
+	 *      [https://github.com/joncampbell123/dosbox-x/issues/3626]
 	 */
-        DOS_INFOBLOCK_SEG = DOS_GetMemory(0x20,"DOS_INFOBLOCK_SEG");	// was 0x80
-        DOS_CONDRV_SEG = DOS_GetMemory(0x08,"DOS_CONDRV_SEG");		// was 0xA0
-        DOS_CONSTRING_SEG = DOS_GetMemory(0x0A,"DOS_CONSTRING_SEG");	// was 0xA8
-        DOS_SDA_SEG = DOS_GetMemory(DOS_SDA_SEG_SIZE>>4,"DOS_SDA_SEG");		// was 0xB2  (0xB2 + 0x56 = 0x108)
-        DOS_SDA_OFS = 0;
-        DOS_CDS_SEG = DOS_GetMemory(0x10,"DOS_CDA_SEG");		// was 0x108
+	DOS_INFOBLOCK_SEG = DOS_GetMemory(0x32,"DOS_INFOBLOCK_SEG");		// was 0x80  0x32 = 0x20(INFOBLOCK) + 0x08(old CONDRV_SEG) + 0x0A(CONSTRING_SEG)
+	DOS_SDA_SEG = DOS_GetMemory(DOS_SDA_SEG_SIZE>>4,"DOS_SDA_SEG");		// was 0xB2  (0xB2 + 0x56 = 0x108)
+	DOS_SDA_OFS = 0;
+
+	/* 2024/06/02: Keep the CON driver away from the clusterfuck of the INFOBLOCK and SFT mess */
+	DOS_CONDRV_SEG = DOS_GetMemory(0x04,"DOS_CONDRV_SEG");		// was 0xA0
+	DOS_CDS_SEG = DOS_GetMemory(0x10,"DOS_CDA_SEG");		// was 0x108
 
 		LOG(LOG_DOSMISC,LOG_DEBUG)("DOS kernel alloc:");
 		LOG(LOG_DOSMISC,LOG_DEBUG)("   IHSEG:        seg 0x%04x",DOS_IHSEG);
 		LOG(LOG_DOSMISC,LOG_DEBUG)("   infoblock:    seg 0x%04x",DOS_INFOBLOCK_SEG);
 		LOG(LOG_DOSMISC,LOG_DEBUG)("   condrv:       seg 0x%04x",DOS_CONDRV_SEG);
-		LOG(LOG_DOSMISC,LOG_DEBUG)("   constring:    seg 0x%04x",DOS_CONSTRING_SEG);
 		LOG(LOG_DOSMISC,LOG_DEBUG)("   SDA:          seg 0x%04x:0x%04x %u bytes",DOS_SDA_SEG,DOS_SDA_OFS,DOS_SDA_SEG_SIZE);
 		LOG(LOG_DOSMISC,LOG_DEBUG)("   CDS:          seg 0x%04x",DOS_CDS_SEG);
 		LOG(LOG_DOSMISC,LOG_DEBUG)("[private segment @ this point 0x%04x-0x%04x mem=0x%04lx]",
@@ -4519,10 +4533,18 @@ public:
          *      This should be looked into. In the meantime, setting the MCB
          *      start segment before or after 0x800 helps to resolve these issues.
          *      It also puts DOSBox-X at parity with main DOSBox SVN behavior. */
-        if (minimum_mcb_free == 0)
-            minimum_mcb_free = IS_PC98_ARCH ? 0x800 : 0x700;
-        else if (minimum_mcb_free < minimum_mcb_segment)
+	/* NTS: If the user is trying to emulate a DOS machine with smaller than
+	 *      256KB amounts of memory, then minimum mcb free needs to be much
+	 *      smaller to make room and allow for it */
+        if (minimum_mcb_free == 0) {
+            if (MEM_TotalPages() < 0x40/*256KB*/)
+                minimum_mcb_free = minimum_mcb_segment;
+            else
+                minimum_mcb_free = IS_PC98_ARCH ? 0x800 : 0x700;
+        }
+        else if (minimum_mcb_free < minimum_mcb_segment) {
             minimum_mcb_free = minimum_mcb_segment;
+        }
 
         LOG(LOG_DOSMISC,LOG_DEBUG)("   min free:     seg 0x%04x",minimum_mcb_free);
 

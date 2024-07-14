@@ -1,5 +1,5 @@
 ﻿#define MyAppName "DOSBox-X"
-#define MyAppVersion "2024.03.01"
+#define MyAppVersion "2024.07.01"
 #define MyAppBit "(32/64bit for Windows)"
 #define MyAppPublisher "joncampbell123 [DOSBox-X Team]"
 #define MyAppURL "https://dosbox-x.com/"
@@ -43,8 +43,8 @@ PrivilegesRequired=admin
 UninstallDisplayName={#MyAppName} {#MyAppVersion} {#MyAppBit}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 WizardSmallImageFile=..\..\icons\dosbox-x.bmp
-;MinVersion below 6.1 is not recommended, however set to 6.0 to support Vista
-MinVersion=6.0
+;MinVersion 6.0 is required for Vista, however Inno Setup no longer supports it
+;MinVersion=6.0
 
 [Messages]
 InfoBeforeLabel=Please read the general information about DOSBox-X below.

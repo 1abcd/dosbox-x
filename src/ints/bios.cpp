@@ -75,6 +75,8 @@ extern bool PS1AudioCard;
 # define S_ISREG(x) ((x & S_IFREG) == S_IFREG)
 #endif
 
+extern bool ega200;
+
 unsigned char ACPI_ENABLE_CMD = 0xA1;
 unsigned char ACPI_DISABLE_CMD = 0xA0;
 unsigned int ACPI_IO_BASE = 0x820;
@@ -9350,6 +9352,8 @@ void BuildACPITable(void) {
 	rsdt_tw.finish();
 }
 
+extern unsigned int INT13Xfer;
+
 class BIOS:public Module_base{
 private:
     static Bitu cb_bios_post__func(void) {
@@ -9368,6 +9372,7 @@ private:
 	INT13_ElTorito_NoEmuDriveNumber = 0;
 	INT13_ElTorito_NoEmuCDROMDrive = 0;
 	INT13_ElTorito_IDEInterface = -1;
+	INT13Xfer = 0;
 
 	ACPI_mem_enable(false);
 	ACPI_REGION_SIZE = 0;
@@ -10775,9 +10780,10 @@ startfunction:
             CALLBACK_RunRealInt(0x10);
             DrawDOSBoxLogoVGA((unsigned int)logo_x*8u,(unsigned int)logo_y*(unsigned int)rowheight);
         }
-        else if (machine == MCH_EGA && !textsplash) {
+        else if (machine == MCH_EGA && !textsplash && !ega200 && vga.mem.memsize >= (128*1024)) { /* not ega200 and at least 128KB of VRAM */
             rowheight = 14;
-            reg_eax = 16;       // 640x350 16-color
+            reg_eax = 16; // 640x350 16-color
+
             CALLBACK_RunRealInt(0x10);
 
             // color correction: change Dark Puke Yellow to brown
@@ -10789,7 +10795,7 @@ startfunction:
 
             DrawDOSBoxLogoVGA((unsigned int)logo_x*8u,(unsigned int)logo_y*(unsigned int)rowheight);
         }
-        else if ((machine == MCH_CGA || machine == MCH_MCGA || machine == MCH_PCJR || machine == MCH_AMSTRAD || machine == MCH_TANDY) && !textsplash) {
+        else if ((machine == MCH_CGA || machine == MCH_EGA || machine == MCH_MCGA || machine == MCH_PCJR || machine == MCH_AMSTRAD || machine == MCH_TANDY) && !textsplash) {
             rowheight = 8;
             reg_eax = 6;        // 640x200 2-color
             CALLBACK_RunRealInt(0x10);
@@ -11385,11 +11391,13 @@ startfunction:
 
         // TODO: If instructed to boot a guest OS...
 
-        /* wipe out the stack so it's not there to interfere with the system */
-        reg_esp = 0;
+        /* wipe out the stack so it's not there to interfere with the system, point it at top of memory or top of segment */
+        reg_esp = std::min((unsigned int)((MEM_TotalPages() << 12) - 0x600 - 4),0xFFFCu);
         reg_eip = 0;
         CPU_SetSegGeneral(cs, 0x60);
         CPU_SetSegGeneral(ss, 0x60);
+
+        LOG(LOG_MISC,LOG_DEBUG)("BIOS boot SS:SP %04x:%04x",(unsigned int)0x60,(unsigned int)reg_esp);
 
         for (Bitu i=0;i < 0x400;i++) mem_writeb(0x7C00+i,0);
 		if ((bootguest||(!bootvm&&use_quick_reboot))&&!bootfast&&bootdrive>=0&&imageDiskList[bootdrive]) {

@@ -469,7 +469,7 @@ VideoModeBlock ModeList_EGA_200[]={
 { 0x003  ,M_TEXT   ,640 ,400 ,80 ,25 ,8 ,8  ,4 ,0xB8000 ,0x1000 ,118 ,262 ,80 ,200 ,0	},
 { 0x004  ,M_CGA4   ,320 ,200 ,40 ,25 ,8 ,8  ,1 ,0xB8000 ,0x4000 ,61  ,262 ,40 ,200 ,_EGA_HALF_CLOCK	| _REPEAT1},
 { 0x005  ,M_CGA4   ,320 ,200 ,40 ,25 ,8 ,8  ,1 ,0xB8000 ,0x4000 ,61  ,262 ,40 ,200 ,_EGA_HALF_CLOCK	| _REPEAT1},
-{ 0x006  ,M_CGA2   ,640 ,200 ,80 ,25 ,8 ,8  ,1 ,0xB8000 ,0x4000 ,118 ,262 ,40 ,200 ,0   },
+{ 0x006  ,M_CGA2   ,640 ,200 ,80 ,25 ,8 ,8  ,1 ,0xB8000 ,0x4000 ,118 ,262 ,80 ,200 ,_REPEAT1   },
 { 0x007  ,M_TEXT   ,640 ,200 ,80 ,25 ,8 ,8  ,8 ,0xB0000 ,0x1000 ,118 ,262 ,80 ,200 ,0	},
 { 0x00D  ,M_EGA    ,320 ,200 ,40 ,25 ,8 ,8  ,8 ,0xA0000 ,0x2000 ,61  ,262 ,40 ,200 ,_EGA_HALF_CLOCK	},
 { 0x00E  ,M_EGA    ,640 ,200 ,80 ,25 ,8 ,8  ,4 ,0xA0000 ,0x4000 ,118 ,262 ,80 ,200 ,0 },
@@ -480,7 +480,7 @@ VideoModeBlock ModeList_EGA_200[]={
 /* NTS: I will *NOT* set the double scanline flag for 200 line modes.
  *      The modes listed here are intended to reflect the actual raster sent to the EGA monitor,
  *      not what you think looks better. EGA as far as I know, is either sent a 200-line mode,
- *      or a 350-line mode. There is no VGA-line 200 to 400 line doubling. */
+ *      or a 350-line mode. There is no VGA-like 200 to 400 line doubling. */
 VideoModeBlock ModeList_EGA[]={
 /* mode  ,type     ,sw  ,sh  ,tw ,th ,cw,ch ,pt,pstart  ,plength,htot,vtot,hde,vde special flags */
 { 0x000  ,M_TEXT   ,320 ,350 ,40 ,25 ,8 ,14 ,8 ,0xB8000 ,0x0800 ,50  ,366 ,40 ,350 ,_EGA_HALF_CLOCK	},
@@ -887,7 +887,7 @@ static void FinishSetMode(bool clearmem) {
 		real_writeb(BIOSMEM_SEG,BIOSMEM_NB_ROWS,(uint8_t)(CurMode->theight-1));
 		real_writew(BIOSMEM_SEG,BIOSMEM_CHAR_HEIGHT,(uint16_t)CurMode->cheight);
 		real_writeb(BIOSMEM_SEG,BIOSMEM_VIDEO_CTL,(0x60|(clearmem?0:0x80)));
-		real_writeb(BIOSMEM_SEG,BIOSMEM_SWITCHES,0x09);
+		real_writeb(BIOSMEM_SEG,BIOSMEM_SWITCHES,(!IS_VGA_ARCH && ega200)?0x08:0x09);
 		// this is an index into the dcc table:
 #if C_DEBUG
 		if(IS_VGA_ARCH) real_writeb(BIOSMEM_SEG,BIOSMEM_DCC_INDEX,DISP2_Active()?0x0c:0x0b);
@@ -1237,6 +1237,26 @@ bool INT10_SetVideoMode_OTHER(uint16_t mode,bool clearmem) {
 	return true;
 }
 
+extern bool int10_vp_use_always;
+extern bool int10_vp_use_auto;
+
+static bool ShouldUseVPT(void) {
+	if (int10_vp_use_always)
+		return true;
+	if (!int10_vp_use_auto)
+		return false;
+
+	/* If the VPT points into ROM, no.
+	 * Otherwise a DOS program wants to override it, yes. */
+	RealPt r_vsopt = real_readd(BIOSMEM_SEG,0xA8);
+	if (r_vsopt != 0) {
+		RealPt r_vpt = real_readd(RealSeg(r_vsopt),RealOff(r_vsopt));
+		if (RealSeg(r_vpt) < 0xC000) return true;
+	}
+
+	return false;
+}
+
 bool unmask_irq0_on_int10_setmode = true;
 bool INT10_SetVideoMode(uint16_t mode) {
 	if (CurMode&&CurMode->mode==7&&!IS_PC98_ARCH) {
@@ -1282,6 +1302,56 @@ bool INT10_SetVideoMode(uint16_t mode) {
 	}
 #endif
 	if (!IS_EGAVGA_ARCH) return INT10_SetVideoMode_OTHER(mode,clearmem);
+
+	/* Whether to use video parameter table to set the mode */
+	bool vptable = false;
+	PhysPt vptp = 0;
+
+	if (IS_EGAVGA_ARCH && mode <= 0x13/*standard EGA/VGA modes only*/ && ShouldUseVPT()) {
+		RealPt r_vpt = 0;
+		RealPt r_vsopt = real_readd(BIOSMEM_SEG,0xA8);
+		if (r_vsopt != 0) r_vpt = real_readd(RealSeg(r_vsopt),RealOff(r_vsopt));
+
+		if (r_vpt != 0) {
+			PhysPt vptp_base;
+
+			vptp = vptp_base = Real2Phys(r_vpt);
+			vptable = true;
+
+			/* map video mode to table */
+			switch (mode) {
+				case 0: case 1: case 2: case 3: /* text mode */
+					if (IS_VGA_ARCH) vptp += ((mode & 2) ? 0x18 : 0x17) * 0x40; /* high res text VGA (0/1 and 2/3 are the same) */
+					else if (IS_EGA_ARCH && !ega200) vptp += (mode + 0x13) * 0x40; /* high res text EGA */
+					else vptp += mode * 0x40; /* low res text CGA */
+					break;
+				case 7: /* 80x25 mono text mode */
+					if (IS_VGA_ARCH) vptp += 0x19 * 0x40;
+					else vptp += 0x07 * 0x40;
+					break;
+				case 4: case 5: case 6: /* CGA graphics, the unused modes, EGA 320x200 and 640x200 16-color */
+				case 8: case 9: case 10:case 11:
+				case 12:case 13:case 14:
+					vptp += mode * 0x40;
+					break;
+				case 15:case 16: /* EGA 640x350 mono, 16-color mode */
+					if (IS_VGA_ARCH || (IS_EGA_ARCH && vga.mem.memsize >= 0x20000)) vptp += (mode + 2) * 0x40; /* >64KB configuration */
+					else vptp += mode * 0x40; /* 64KB configuration */
+					break;
+				case 17:case 18:case 19: /* MCGA 640x480, VGA 640x480, VGA 320x200x256 */
+					vptp += ((mode - 17) + 0x1A) * 0x40;
+					break;
+				default:
+					abort();
+					break;
+			}
+
+			LOG(LOG_MISC,LOG_DEBUG)("Using VPT table at 0x%x (entry 0x%02x) to set mode %u",
+				(unsigned int)vptp,
+				(unsigned int)((vptp - vptp_base) / 0x40),
+				(unsigned int)mode);
+		}
+	}
 
 	/* First read mode setup settings from bios area */
 	//	uint8_t video_ctl=real_readb(BIOSMEM_SEG,BIOSMEM_VIDEO_CTL);
@@ -1384,6 +1454,10 @@ bool INT10_SetVideoMode(uint16_t mode) {
 		default:
 			misc_output|=0x20;
 	}
+
+	if (vptable)
+		misc_output = phys_readb(vptp+0x09);
+
 	IO_Write(0x3c2,misc_output);		//Setup for 3b4 or 3d4
 	real_writew(BIOSMEM_SEG,BIOSMEM_CRTC_ADDRESS,((CurMode->mode==7 )|| (CurMode->mode==0x0f)) ? 0x3b4 : 0x3d4); // update immediately
 
@@ -1435,6 +1509,7 @@ bool INT10_SetVideoMode(uint16_t mode) {
 			break;
 		case M_LIN4:
 		case M_EGA:
+			// All must be enabled even for EGA 640x350 4-color mode in order for bitplanes 2-3 to chain alongside bitplanes 0-1
 			seq_data[2]|=0xf;				//Enable all planes for writing
 			break;
 		case M_LIN8:						//Seems to have the same reg layout from testing
@@ -1450,6 +1525,12 @@ bool INT10_SetVideoMode(uint16_t mode) {
 		default:
 			break;
 	}
+
+	if (vptable) {
+		for (unsigned int i=1;i < 5;i++)
+			seq_data[i] = phys_readb(vptp+0x05+(i-1)); /* sequencer registers 1-4 */
+	}
+
 	for (uint8_t ct=0;ct<SEQ_REGS;ct++) {
 		IO_Write(0x3c4,ct);
 		IO_Write(0x3c5,seq_data[ct]);
@@ -1674,7 +1755,7 @@ bool INT10_SetVideoMode(uint16_t mode) {
 			break;
 		case M_EGA:
 			if (IS_EGA_ARCH && vga.mem.memsize < 0x20000 && CurMode->vdispend==350)
-				offset = CurMode->hdispend/4;
+				offset = CurMode->hdispend/4; /* = 0x14, See EGA BIOS listing for entry 10h 16K mode [https://ibmmuseum.com/Adapters/Video/EGA/IBM_EGA_Manual.pdf] */
 			else
 				offset = CurMode->hdispend/2;
 			break;
@@ -1746,6 +1827,15 @@ bool INT10_SetVideoMode(uint16_t mode) {
 		mode_control &= ~0x20; // address wrap bit 13
 
 	IO_Write(crtc_base, 0x17); IO_Write(crtc_base + 1u, mode_control);
+
+	/* TODO: If vptable, bypass all the above CRTC register settings */
+	if (vptable) {
+		for (unsigned int i=0;i < 0x19;i++) {
+			IO_Write(crtc_base,i);
+			IO_Write(crtc_base+1,phys_readb(vptp+0x0A+i)); /* CRTC registers 0-18h */
+		}
+	}
+
 	/* Renable write protection */
 	IO_Write(crtc_base,0x11);
 	IO_Write(crtc_base+1u,IO_Read(crtc_base+1u)|0x80);
@@ -1835,13 +1925,22 @@ bool INT10_SetVideoMode(uint16_t mode) {
 	default:
 		break;
 	}
+
+	if (vptable) {
+		for (unsigned int i=1;i < 9;i++)
+			gfx_data[i] = phys_readb(vptp+0x37+i); /* graphics controller regs 0-8 */
+	}
+
 	for (uint8_t ct=0;ct<GFX_REGS;ct++) {
 		IO_Write(0x3ce,ct);
 		IO_Write(0x3cf,gfx_data[ct]);
 	}
 	uint8_t att_data[ATT_REGS];
 	memset(att_data,0,ATT_REGS);
-	att_data[0x12]=0xf;				//Always have all color planes enabled
+	if (IS_EGA_ARCH && vga.mem.memsize < 0x20000 && CurMode->vdispend==350 && CurMode->type == M_EGA)
+		att_data[0x12]=0x5;				//Bitplanes 0 and 2 only
+	else
+		att_data[0x12]=0xf;				//Always have all color planes enabled
 	/* Program Attribute Controller */
 	switch (CurMode->type) {
 		case M_EGA:
@@ -1897,6 +1996,17 @@ att_text16:
 					att_data[i]=0x08;
 					att_data[i+8]=0x18;
 				}
+			} else if (IS_EGA_ARCH && vga.mem.memsize < 0x20000 && CurMode->vdispend==350 && CurMode->type == M_EGA) {
+				for (i=0;i < 16;i += 8) {
+					att_data[i+0]=0x00;
+					att_data[i+1]=0x01;
+					att_data[i+2]=0x00;
+					att_data[i+3]=0x00;
+					att_data[i+4]=0x04;
+					att_data[i+5]=0x07;
+					att_data[i+6]=0x00;
+					att_data[i+7]=0x00;
+				}
 			} else {
 				for (uint8_t ct=0;ct<8;ct++) {
 					att_data[ct]=ct;
@@ -1949,6 +2059,12 @@ att_text16:
 			break;
 	}
 	IO_Read(mono_mode ? 0x3ba : 0x3da);
+
+	if (vptable) {
+		for (unsigned int i=1;i < 0x14;i++)
+			att_data[i] = phys_readb(vptp+0x23+i); /* contents of attribute controller regs 0-13h */
+	}
+
 	if ((modeset_ctl & 8)==0) {
 		for (uint8_t ct=0;ct<ATT_REGS;ct++) {
 			IO_Write(0x3c0,ct);

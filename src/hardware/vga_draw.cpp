@@ -473,6 +473,8 @@ static uint8_t * VGA_Draw_1BPP_Line(Bitu vidstart, Bitu line) {
 	return VGA_Draw_1BPP_Line_Common<MCH_CGA,uint8_t>(TempLine,vidstart,line);
 }
 
+extern uint32_t HercBlend_2_Table[16];
+
 static uint8_t * VGA_Draw_1BPP_Blend_Line(Bitu vidstart, Bitu line) {
     const uint8_t *base = vga.tandy.draw_base + ((line & vga.tandy.line_mask) << vga.tandy.line_shift);
     uint32_t *draw = (uint32_t *)TempLine;
@@ -481,8 +483,8 @@ static uint8_t * VGA_Draw_1BPP_Blend_Line(Bitu vidstart, Bitu line) {
         Bitu val1 = base[vidstart & (8 * 1024 -1)];
         Bitu val2 = (val1 >> 1) + carry;
         carry = (val1 & 1) << 7;
-        *draw++=CGA_2_Table[val1 >> 4] + CGA_2_Table[val2 >> 4];
-        *draw++=CGA_2_Table[val1 & 0xf] + CGA_2_Table[val2 & 0xf];
+        *draw++=HercBlend_2_Table[val1 >> 4] + HercBlend_2_Table[val2 >> 4];
+        *draw++=HercBlend_2_Table[val1 & 0xf] + HercBlend_2_Table[val2 & 0xf];
     }
     return TempLine;
 }
@@ -1051,6 +1053,65 @@ template <const unsigned int card,typename templine_type_t> static uint8_t * EGA
         return dst + (vga.draw.panning*sizeof(templine_type_t));
     else
         return NULL;
+}
+
+template <const unsigned int card,typename templine_type_t> static uint8_t * EGA_Planar_Common_LineOddEven(uint8_t *dst,Bitu vidstart, Bitu line) {
+    if (vga.crtc.maximum_scan_line & 0x80) line >>= 1u; /* CGA modes (and 200-line EGA) have the VGA doublescan bit set. We need to compensate to properly map lines. */
+    uint8_t *vram = vga.draw.linear_base + ((line & vga.tandy.line_mask) << (2+vga.tandy.line_shift));
+    Bitu vidmask = vga.tandy.line_mask ? ((vga.tandy.addr_mask << 2) | 3) : vga.draw.linear_mask;
+    templine_type_t* temps = (templine_type_t*)dst;
+    Bitu count = vga.draw.blocks + ((vga.draw.panning + 7u) >> 3u);
+    Bitu i = 0;
+
+    /* This code assumes addr_shift != 0 */
+
+    /* Odd/even wraparound */
+    if (vidstart & (vidmask + 1u)) vidstart += 4u;
+
+    /* All EGA/VGA modes obey the MEM13 bits and other bits present in the hardware that
+     * exist purely for CGA backwards compatibility. CGA graphics modes are just EGA planar
+     * modes with fewer bitplanes enabled, and for 4-color mode, an odd bit in the graphics
+     * controller that tells the hardware to make 2-bit groups of the 1-bit pixels in the
+     * bitplanes. That's it.
+     *
+     * Also, Prehistorik likes to abuse the CGA memory mapping in the difficulty select
+     * screen (text with a rapidly panning repeating background) when starting a game.
+     *
+     * Also, even though it is rarely used, EGA/VGA do have another bit that enables a
+     * 4-way interleave that was obviously added with Hercules graphics mode in mind. */
+
+    while (count > 0u) {
+        uint32_t t1,t2,r;
+
+	r = *((uint32_t*)(&vram[ vidstart & vidmask ]));
+
+	t1 = t2 = r;
+        t1 = (t1 >> 4) & 0x0f0f0f0f;
+        t2 &= 0x0f0f0f0f;
+        EGA_Planar_Common_Block<card,templine_type_t>(temps+i,t1,t2);
+        i += 8;
+
+	r = (r >> 8) + (r << 24);
+
+	t1 = t2 = r;
+        t1 = (t1 >> 4) & 0x0f0f0f0f;
+        t2 &= 0x0f0f0f0f;
+        EGA_Planar_Common_Block<card,templine_type_t>(temps+i,t1,t2);
+        i += 8;
+
+        vidstart += (uintptr_t)4 << (uintptr_t)vga.config.addr_shift;
+        if ((vidstart & vidmask & (~4u)) == 0) vidstart ^= 4u;
+        count--;
+    }
+
+    if (card != MCH_RAW_SNAPSHOT)
+        return dst + (vga.draw.panning*sizeof(templine_type_t));
+    else
+        return NULL;
+}
+
+static uint8_t * EGA_Draw_VGA_Planar_Xlat8_LineOddEven(Bitu vidstart, Bitu line) {
+    return EGA_Planar_Common_LineOddEven<MCH_EGA,uint8_t>(TempLine,vidstart,line);
 }
 
 static uint8_t * EGA_Draw_VGA_Planar_Xlat8_Line(Bitu vidstart, Bitu line) {
@@ -5595,8 +5656,20 @@ pic_tickindex_t VGA_PITSync_delay(void) {
 	return et;
 }
 
+#if C_DEBUG
+extern bool DEBUG_HaltOnRetrace;
+Bitu DEBUG_EnableDebugger(void);
+#endif
+
 static void VGA_VerticalTimer(Bitu /*val*/) {
 	double current_time = PIC_GetCurrentEventTime();
+
+#if C_DEBUG
+	if (DEBUG_HaltOnRetrace) {
+		DEBUG_EnableDebugger();
+		DEBUG_HaltOnRetrace = false;
+	}
+#endif
 
 	dbg_event_maxscan = false;
 	dbg_event_scanstep = false;
@@ -5897,7 +5970,7 @@ static void VGA_VerticalTimer(Bitu /*val*/) {
 			 * switch the CRTC to other non-BYTE modes:
 			 *
 			 * - "Unreal" by Future Crew, "Vectorballs", CRTC WORD mode */
-			vga.draw.linear_mask = 0x3ffffu;
+			vga.draw.linear_mask = 0x3ffffu & vga.mem.memmask; /* NTS: We allow EGA with less than 256KB! */
 			vga.draw.address *= (Bitu)1u << (Bitu)vga.config.addr_shift; /* NTS: Remember the bizarre 4 x 4 mode most SVGA chipsets do */
 			break;
 		case M_VGA:
@@ -6387,6 +6460,7 @@ bool IsDebuggerActive(void);
 void VGA_DebugRedraw(void) {
 #if C_DEBUG
 	if (IsDebuggerActive()) {
+		VGA_RenderOnDemandComplete();
 		RENDER_EndUpdate(true);
 		vga.draw.lines_done = vga.draw.lines_total;
 		PIC_RemoveEvents(VGA_Other_VertInterrupt);
@@ -6395,7 +6469,6 @@ void VGA_DebugRedraw(void) {
 		PIC_RemoveEvents(VGA_DisplayStartLatch);
 		VGA_DisplayStartLatch(0);
 		VGA_VerticalTimer(0);
-		VGA_RenderOnDemandComplete();
 	}
 #endif
 }
@@ -6416,13 +6489,7 @@ void VGA_CheckScanLength(void) {
 	switch (vga.mode) {
 		case M_EGA:
 		case M_LIN4:
-			if ((machine==MCH_EGA)&&(vga.crtc.mode_control&0x8))
-				vga.draw.address_add=vga.config.scan_len*16; // TODO
-			else
-				vga.draw.address_add=vga.config.scan_len*(8u<<(unsigned int)vga.config.addr_shift);
-
-			if (IS_EGA_ARCH && (vga.seq.clocking_mode&4))
-				vga.draw.address_add*=2;
+			vga.draw.address_add=vga.config.scan_len*(8u<<(unsigned int)vga.config.addr_shift);
 			break;
 		case M_PACKED4:
 			vga.draw.address_add=vga.config.scan_len*8;
@@ -7211,6 +7278,12 @@ void VGA_SetupDrawing(Bitu /*val*/) {
 				if (vga.gfx.mode & 0x20) {
 					VGA_DrawLine = EGA_Draw_2BPP_Line_as_EGA;
 					VGA_DrawRawLine = VGA_RawDraw_2BPP_Line_as_VGA;
+				}
+				else if (vga.config.addr_shift >= 1/*word mode*/ && (vga.seq.clocking_mode & 0x04/*load every other clock cycle*/) &&
+					(vga.crtc.mode_control & 0x08/*increase memory address every other character clock*/)) {
+					VGA_DrawLine = EGA_Draw_VGA_Planar_Xlat8_LineOddEven;
+					VGA_DrawRawLine = VGA_RawDraw_VGA_Planar_Xlat32_Line;//TODO
+					vga.draw.blocks = (width+1u)>>1u;
 				}
 				else {
 					VGA_DrawLine = EGA_Draw_VGA_Planar_Xlat8_Line;

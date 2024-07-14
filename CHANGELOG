@@ -1,4 +1,137 @@
-Next:
+NEXT
+  - S3 XGA emulation: Add XGA acceleration for 4bpp packed 16-color
+    SVGA modes. A CAD package has S3 support drivers that use the
+    16-color 4bpp packed modes and expects XGA acceleration to work.
+    (joncampbell123).
+  - Add "-o int13" option to IMGMOUNT to direct the FAT driver to do
+    all disk I/O through INT 13h instead of directly. This is intended
+    for certain demoscene productions that apparently like to make
+    files appear out of thin air by intercepting INT 13h floppy disk
+    I/O and then asking MS-DOS to run something from it. Hack for
+    "DS_BLISS" demo. (joncampbell123).
+  - add option "[dos] automount drive directories" for Windows builds,
+    this will mount existing drive directories from C to Y drive (aybe).
+  - fix off-center and off-screen window after entering the
+    configuration tool while using TTF output mode (aybe).
+  - add menu item for centering window "Video/Center window" (aybe).
+  - Fixed update-version-number script to patch all *.iss files, not 
+    just the specific one it did before, to ensure future releases have
+    correct version numbers. (joncampbell123).
+  - Updated Nuked-OPL3 code to nukeykt/Nuked-OPL3@cfedb09 (StevenSYS) 
+  - Updated SDL2 library to 2.30.4 (maron2000)
+  - Fixed TTF mode didn't change to graphic mode when machine = Hercules
+    (maron2000)
+  - Configuration tool: (aybe)
+    - more Windows 3.1 styling: buttons, colors, focus, layout
+    - enhance main window layout, it is now visible in its entirety
+    - fix layout issues, off by one in rectangle drawing functions
+    - fix 'list iterators incompatible' when pressing the Tab key
+    - properties/help: sorted alphabetically, mouse wheel scrollable
+    - remove few rendundant labels, adjust names of some others
+    - retain 'show advanced options' state throughout session
+
+2024.07.01
+  - Correct Hercules InColor memory emulation. Read and write planar
+    behavior was incorrect due to a misunderstanding of available
+    documentation. (joncampbell123).
+  - Hercules/MDA and InColor integration broke the Hercules blend mode
+    render, fix the render so that adjacent lit pixels are brighter
+    again. (joncampbell123).
+  - Fix "VRD" debugger command bug that didn't properly render out the
+    rest of the VGA display frame. (joncampbell123).
+  - Fixed debugger mapper shortcut bug where entering the debugger
+    completes the 1 ms "tick" early, effectively jumping emulator time
+    up to start of the next ms. This might explain the mysterious cases
+    where a program always fails to work unless you are debugging it.
+    (joncampbell123).
+  - Added debugger command "VRT" which resumes running the guest until
+    vertical retrace. Added for programmers who wish to write something
+    to screen and then see it show up. (joncampbell123).
+  - Fix IMGMOUNT, when mounting FAT disk images, to provide the DPB the
+    actual media id byte instead of assuming 0xF8 or 0xF0. INT AH=1Ch
+    should now report the proper media id byte for any floppy format,
+    instead of always reporting 0xF0 (1.44MB floppy). (joncampbell123).
+  - Allow BOOT to load and execute the boot sector of a guest OS even if
+    memory size is too small (in IBM PC emulation, less than 32KB of RAM).
+    MS-DOS 1.x of course will crash if you try that because of the
+    assumptions made in the boot sector, but it's there if you are feeling
+    adventurous or are in an experimental mood (joncampbell123).
+  - If memsize is 4KB, place the COMMAND.COM PSP segment in the private
+    UMB area instead of the normal MCB allocation chain (joncampbell123).
+  - DOS kernel will always allocate kernel memory from private UMB area
+    if memory size < 16KB, in order to continue to work (joncampbell123).
+  - DOS kernel will allocate from segment 0x60 instead of 0x70 if the
+    memory size is less than 64KB. (joncampbell123).
+  - files= and fcbs= default value now automatically scales according to
+    available conventional memory (640KB or lower) in order for memsize 64KB
+    or lower to free up or memory and run properly. (joncampbell123).
+  - dosbox.conf files= and fcbs= settings have been changed to allow
+    "0" as a value to mean choose a reasonable default. (joncampbell123).
+  - Fix bug where DOS kernel crashes on startup because of the initial
+    stack pointer set by BIOS startup that points past available memory
+    when memsize is 64KB or less. (joncampbell123).
+  - If minimum mcb free is not set and memory size is less than 256KB,
+    automatically set minimum mcb free to minimum mcb segment, in order
+    to release more available memory within the limited space (joncampbell123).
+  - Do not enable XMS emulation if system memory size is 1MB or less. (joncampbell123)
+  - DOS drive cache: When listing a directory, defer the filename sort until
+    the entire list is built. This improves directory listing performance
+    in directories with many files. (joncampbell123).
+  - INT 10h, if instructed, will now use the video parameter table to set
+    standard VGA modes instead of internal logic. (joncampbell123).
+  - Removed erroneous VGA display compensation code for certain EGA/VGA
+    registers that really only caused incorrect display of the EGA 640x350
+    4-color mode. (joncampbell123).
+  - Corrected EGA and VGA video parameter tables by copying the parameters
+    from actual IBM EGA VGA ROM BIOS images. They should be 100% correct
+    now. (joncampbell123).
+  - Corrected register values and video rendering of machine=EGA 640x350
+    mode when emulating 64KB of RAM. This should fix rendering and display
+    issues with EGA 640x350 4-color emulation. Also corrected INT 10h
+    character printing functions to filter the color attribute value for
+    640x350 4-color mode so the DOS prompt does not have alternating
+    colors, in the same manner the real IBM EGA BIOS does. (joncampbell123).
+  - Fix BIOS screen to use CGA 640x200 2-color mode if machine=ega with
+    less than 128KB of video ram, or machine=ega200, instead of showing
+    a garbled 640x350 display. (joncampbell123).
+  - Fix memory buffer overrun with machine=ega that can occur with
+    640x350 mode and less than 256KB of video RAM. (joncampbell123).
+  - The DOSBox clipboard API (via INT 2Fh) is now disabled by default, because
+    some programs use it's presence to detect whether they are running under
+    Windows. This fixes a program where Norton Desktop 1.0 does not use it's
+    "graphical" text UI elements because it thinks it's running within a
+    Windows DOS box. (joncampbell123).
+  - Remove unnecessary and useless Win32 fcntl() on some memory typecast
+    to int which is causing a segfault whenever a ZIP file is mounted
+    as a drive with an overlay filesystem atop it. (joncampbell123)
+  - Update caption control feature to use equivalent APIs on Mac OS. (joncampbell123)
+  - Add dosbox.conf and menu option to control whether the DOSBox-X window
+    can be seen in screen captures in Windows 7/8/10/11. Windows 11 "Recall"
+    is very concerning and users might not want their DOS gaming to be
+    part of it's memory. (joncampbell123).
+  - Correct EGA switch readback from port 3C2h to reflect a value of 0x8
+    instead of 0x9 when machine=ega200 (joncampbell123).
+  - Correct BIOS data area value that holds the "EGA switches" to reflect
+    200-line EGA "emulation" when machine=ega200. Value 0x08 instead of 0x09
+    (joncampbell123).
+  - Correct mode parameters for CGA 640x200 2-color mode when using
+    machine=ega200 so that it displays correctly. (joncampbell123)
+  - DOS kernel: Remove fixed hacks for SFT and dynamically allocate the
+    second SFT table for the last N - 5 file handles. Add code to zero
+    SFT table memory to ensure that random data doesn't cause issues.
+    Windows 3.1 is still perfectly fine with it, so the SFT table update
+    and cleanup is complete. (joncampbell123).
+  - DOS kernel: Move the magic "CON" strings into the first SFT and
+    mimic the 5 default open file handles that every DOS process starts
+    with: CON CON CON AUX PRN. Windows 3.1 is still happy with it, which
+    is good. (joncampbell123).
+  - DOS kernel: Put the CON driver somewhere else because allowing it
+    to overlap the SFT is messy. Fix SFT generation to match the way that
+    MS-DOS 5.0 does it where the first table is always 5 entries and the
+    second table is always N - 5 entries. Cleanup the DOS memory allocation
+    a bit. So far, Windows 3.1 doesn't have a problem with it. (joncampbell123).
+  - DOS kernel: Interrupt handler IRET was accidentally placed within
+    the SFT table, move it up to resolve the conflict. (joncampbell123).
   - Local DOS drive support: On Windows, if the guest is attempting to
     create a hidden file, make sure to call the right APIs to create a
     hidden file on the host. Not only is this needed to create a hidden
@@ -121,12 +254,16 @@ Next:
   - Restored libslirp support for 32-bit MinGW CI builds which was temporarily
     dropped in 2024.03.01 release. Also since MinGW plans to gradually phase
     out 32-bit support, added code to manually build on our own. (maron2000)
-  - Fixed build errors of Windows installers (maron2000) 
+  - Fixed build errors of Windows installers. Windows Vista support for standard
+    installer is dropped to fix this issue. Vista users can either use the XP
+    installer or portable builds instead. (maron2000) 
   - Fixed compile error of speexdsp/fftwrap.c on gcc-14 (maron2000)
   - PC-98: Fixed US keyboard support for tilde (Shift+grave) key (maron2000)
   - Fixed DOSBox-X freezed when codepages regarding EGA18.CPX were set (maron2000)
   - Fixed CUE sheets of GOG games were rejected. Still requires "-t iso" or 
     "-t cdrom" option for uncommon file extensions except ".CUE". (maron2000)
+  - Added loongarch64 support (donmor)
+  - Disable FP exceptions in a portable way (xry111, donmor)
   - Added "*.ccd" in file open dialog (maron2000)
   - Added CI builds for ARM mac (maron2000)
   - Bump tinyfiledialogs to ver 3.17.4 (maron2000)
@@ -139,9 +276,16 @@ Next:
     version is set to 7.1 (maron2000)
   - Fixed some file extensions in the filter list were ignored in the file open
     dialogs (maron2000)
+  - Fixed mounting a non-FAT VHD image (maxpat78)
+  - Fixed VHD geometry detection (maxpat78)
   - Fixed issue that IMGSWAP command did not work for CD drives. (maron2000)
   - Fixed loaded language file unexpectedly changes on launch. (maron2000)
+  - Fixed reported size issues in builtin DIR command (maxpat78)
   - Added missing language file in Windows standard & XP installers. (maron2000)
+  - Fixed a bug in IME character display on macOS Sonoma (nanshiki)
+  - Fixed build errors of SDL1 code when built with gcc-14 (maron2000)
+  - Fixed static link errors of libslirp >= 4.8.0 (maron2000)
+  - PC-98: Added MEM command for PC-98 mode (maron2000)
 
 2024.03.01
   - If an empty CD-ROM drive is attached to IDE emulation, return "Medium Not

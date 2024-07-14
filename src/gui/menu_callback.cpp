@@ -1973,6 +1973,34 @@ void aspect_ratio_menu() {
     mainMenu.get_item("video_ratio_original").check(aspect_ratio_x==-1&&aspect_ratio_y==-1).enable(true).refresh_item(mainMenu);
 }
 
+void ApplyPreventCapMenu(void) {
+#if defined(WIN32) || defined(MACOSX)
+    mainMenu.get_item("prevcap_none").check(preventcap == PREVCAP_NONE).enable(true).refresh_item(mainMenu);
+    mainMenu.get_item("prevcap_blank").check(preventcap == PREVCAP_BLANK).enable(true).refresh_item(mainMenu);
+    mainMenu.get_item("prevcap_invisible").check(preventcap == PREVCAP_INVISIBLE).enable(true).refresh_item(mainMenu);
+#endif
+}
+
+bool preventcapture_menu_callback(DOSBoxMenu * const menu,DOSBoxMenu::item * const menuitem) {
+#if defined(WIN32) || defined(MACOSX)
+    (void)menu;//UNUSED
+    const char *mname = menuitem->get_name().c_str();
+    if (!strcmp(mname, "prevcap_none")) {
+        SetVal("video", "prevent capture", "none");
+        preventcap = PREVCAP_NONE;
+    } else if (!strcmp(mname, "prevcap_blank")) {
+        SetVal("video", "prevent capture", "blank");
+        preventcap = PREVCAP_BLANK;
+    } else if (!strcmp(mname, "prevcap_invisible")) {
+        SetVal("video", "prevent capture", "invisible");
+        preventcap = PREVCAP_INVISIBLE;
+    }
+    ApplyPreventCapMenu();
+    ApplyPreventCap();
+#endif
+    return true;
+}
+
 bool aspect_ratio_menu_callback(DOSBoxMenu * const menu,DOSBoxMenu::item * const menuitem) {
     (void)menu;//UNUSED
     const char *mname = menuitem->get_name().c_str();
@@ -2040,6 +2068,15 @@ bool vsync_set_syncrate_menu_callback(DOSBoxMenu * const menu,DOSBoxMenu::item *
     (void)menu;//UNUSED
     (void)menuitem;//UNUSED
     GUI_Shortcut(17);
+    return true;
+}
+
+bool center_window_menu_callback(DOSBoxMenu * const menu,DOSBoxMenu::item * const menuitem) {
+    (void)menu;//UNUSED
+    (void)menuitem;//UNUSED
+#if defined(C_SDL2)
+    SDL_SetWindowPosition(sdl.window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+#endif
     return true;
 }
 
@@ -3146,6 +3183,19 @@ void AllocCallback1() {
                 mainMenu.alloc_item(DOSBoxMenu::item_type_id,"video_ratio_set").set_text("Set ratio").
                     set_callback_function(aspect_ratio_edit_menu_callback);
             }
+#if defined(WIN32) || defined(MACOSX)
+            {
+                DOSBoxMenu::item &item = mainMenu.alloc_item(DOSBoxMenu::submenu_type_id,"VideoPreventCaptureMenu");
+                item.set_text("Screen capture control");
+
+                mainMenu.alloc_item(DOSBoxMenu::item_type_id,"prevcap_none").set_text("Allow").
+                    set_callback_function(preventcapture_menu_callback);
+                mainMenu.alloc_item(DOSBoxMenu::item_type_id,"prevcap_blank").set_text("Show as blank").
+                    set_callback_function(preventcapture_menu_callback);
+                mainMenu.alloc_item(DOSBoxMenu::item_type_id,"prevcap_invisible").set_text("Make invisible").
+                    set_callback_function(preventcapture_menu_callback);
+            }
+#endif
             {
                 DOSBoxMenu::item &item = mainMenu.alloc_item(DOSBoxMenu::submenu_type_id,"VideoScalerMenu");
                 item.set_text("Scaler");
@@ -3156,6 +3206,11 @@ void AllocCallback1() {
                     mainMenu.alloc_item(DOSBoxMenu::item_type_id,name).set_text(scaler_menu_opts[i][1]).
                         set_callback_function(scaler_set_menu_callback);
                 }
+
+#if defined(C_SDL2)
+                mainMenu.alloc_item(DOSBoxMenu::item_type_id,"center_window").set_text("Center window").
+                    set_callback_function(center_window_menu_callback);
+#endif
 
                 mainMenu.alloc_item(DOSBoxMenu::item_type_id,"set_titletext").set_text("Set title bar text...").
                     set_callback_function(set_titletext_menu_callback);

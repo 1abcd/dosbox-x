@@ -91,6 +91,92 @@
 
 #include <list>
 
+bool int10_vp_use_always = false;
+bool int10_vp_use_auto = true;
+
+unsigned int preventcap = PREVCAP_NONE;
+
+#ifndef WDA_NONE
+# define WDA_NONE 0x00
+#endif
+
+#ifndef WDA_MONITOR
+# define WDA_MONITOR 0x01
+#endif
+
+#ifndef WDA_EXCLUDEFROMCAPTURE /* NTS: Notice this is a bit field of both Windows 7 WDA_MONITOR and Windows 10 EXCLUDEFROMCAPTURE */
+# define WDA_EXCLUDEFROMCAPTURE 0x11
+#endif
+
+void ApplyPreventCapMenu(void);
+
+#if defined(MACOSX)
+void MacOSEnableWindowCapture(unsigned int enable);
+#endif
+
+void ApplyPreventCap(void) {
+#if defined(MACOSX)
+    MacOSEnableWindowCapture(preventcap == PREVCAP_NONE);
+#endif
+#ifdef WIN32
+	HMODULE usr = (HMODULE)GetModuleHandle("USER32.DLL");
+	if (usr) {
+		BOOL (WINAPI *__GetWindowDisplayAffinity)(HWND hWnd,DWORD *pdwAffinity) =
+			(BOOL (WINAPI*)(HWND, DWORD*))GetProcAddress(usr,"GetWindowDisplayAffinity");
+        BOOL (WINAPI * __SetWindowDisplayAffinity)(HWND hWnd, DWORD dwAffinity) =
+            (BOOL (WINAPI*)(HWND, DWORD))GetProcAddress(usr, "SetWindowDisplayAffinity");
+
+        if(__GetWindowDisplayAffinity && __SetWindowDisplayAffinity) {
+			HWND hwnd = GetHWND();
+			DWORD paff = 0,naff = 0;
+
+            __GetWindowDisplayAffinity(hwnd, &paff);
+
+            switch(preventcap) {
+                case PREVCAP_BLANK: naff = WDA_MONITOR; break;
+                case PREVCAP_INVISIBLE: naff = WDA_EXCLUDEFROMCAPTURE; break;
+            }
+
+            /* NTS: Changing from blank to invisible or the other way around doesn't do anything in Windows 11.
+                    It can only be done by removing the exclusion then applying the new one. */
+            const DWORD chkaff = WDA_MONITOR | WDA_EXCLUDEFROMCAPTURE;
+            if(naff != 0 && (paff & chkaff) != (naff & chkaff)) {
+                LOG(LOG_MISC, LOG_DEBUG)("Clearing existing affinity to apply new affinity");
+                paff = 0; __SetWindowDisplayAffinity(hwnd, paff);
+            }
+
+			if (!__SetWindowDisplayAffinity(hwnd,naff)) LOG(LOG_MISC,LOG_DEBUG)("WARNING: SetWindowDisplayAffinity(hwnd,0x%x) failed",(unsigned int)naff);
+		}
+	}
+#endif
+}
+
+bool CheckPreventCap(void) {
+	unsigned int nv = PREVCAP_NONE;
+	bool changed = false;
+
+	Section_prop *video_section = static_cast<Section_prop *>(control->GetSection("video"));
+	assert(video_section != NULL);
+
+	{
+		const char *s = video_section->Get_string("prevent capture");
+
+		if (!strcmp(s,"blank"))
+			nv = PREVCAP_BLANK;
+		else if (!strcmp(s,"invisible"))
+			nv = PREVCAP_INVISIBLE;
+		else
+			nv = PREVCAP_NONE;
+	}
+
+	if (preventcap != nv) {
+		preventcap = nv;
+		changed = true;
+	}
+
+	return changed;
+}
+
 /*===================================TODO: Move to its own file==============================*/
 #if defined(__SSE__) && !(defined(_M_AMD64) || defined(__e2k__))
 bool sse2_available = false;
@@ -884,6 +970,23 @@ void Init_VGABIOS() {
         VGA_BIOS_use_rom = false;
     }
 
+    {
+        const char *s = video_section->Get_string("int 10h use video parameter table");
+
+        if (!strcmp(s,"true") || !strcmp(s,"1")) {
+            int10_vp_use_always = true;
+            int10_vp_use_auto = false;
+        }
+        else if (!strcmp(s,"false") || !strcmp(s,"0")) {
+            int10_vp_use_always = false;
+            int10_vp_use_auto = false;
+        }
+        else {
+            int10_vp_use_always = false;
+            int10_vp_use_auto = true;
+        }
+    }
+
     int size_override = video_section->Get_int("vga bios size override");
     if (size_override > 0) VGA_BIOS_Size_override = ((Bitu)size_override+0x7FFU)&(~0xFFFU);
 
@@ -1337,6 +1440,7 @@ void DOSBOX_SetupConfigSections(void) {
     const char *vga_ac_mapping_settings[] = { "", "auto", "4x4", "4low", "first16", nullptr };
     const char* fpu_settings[] = { "true", "false", "1", "0", "auto", "8087", "287", "387", nullptr };
     const char* sb_recording_sources[] = { "silence", "hiss", "1khz tone", nullptr };
+    const char* int10usevp[] = { "auto", "true", "false", "1", "0", nullptr };
 
     const char* hostkeys[] = {
         "ctrlalt", "ctrlshift", "altshift", "mapper", nullptr };
@@ -1380,6 +1484,10 @@ void DOSBOX_SetupConfigSections(void) {
 	"svga_ati_mach32",
 	"svga_ati_mach64",
 	"fm_towns", // STUB
+        nullptr };
+
+    const char* prevent_capture_opts[] = {
+        "", "none", "blank", "invisible",
         nullptr };
 
     const char* backendopts[] = {
@@ -2362,6 +2470,13 @@ void DOSBOX_SetupConfigSections(void) {
     Pstring->Set_help("Specifies the text color in J-3100 mode. If not specified, the colors will be those of the display type corresponding to the model specified in j3100type.");
 
     secprop=control->AddSection_prop("video",&Null_Init);
+
+    Pstring = secprop->Add_string("int 10h use video parameter table",Property::Changeable::OnlyAtStart,"auto");
+    Pstring->Set_values(int10usevp);
+    Pstring->Set_help("If set, INT 10h will use the video parameter table for standard EGA/VGA modes.\n"
+		      "If not set, internal modesetting will be used, same as DOSBox and most forks do.\n"
+		      "If auto, the video parameter table will be used if any DOS program redirects the table (usually to override mode setting parameters)");
+
     Pint = secprop->Add_int("vmemdelay", Property::Changeable::WhenIdle,0);
     Pint->SetMinMax(-1,1000000);
     Pint->Set_help( "VGA Memory I/O delay in nanoseconds. Set to -1 to use default, 0 to disable.\n"
@@ -2370,6 +2485,17 @@ void DOSBOX_SetupConfigSections(void) {
             "If your game is not sensitive to VGA RAM I/O speed, then turning on this option\n"
             "will do nothing but cause a significant drop in frame rate which is probably not\n"
             "what you want. Recommended values -1, 0 to 2000.");
+
+    // NOTE: This will be revised as I test the DOSLIB code against more VGA/SVGA hardware!
+    Pstring = secprop->Add_string("prevent capture",Property::Changeable::WhenIdle,"");
+    Pstring->Set_values(prevent_capture_opts);
+    Pstring->Set_help(
+            "This option allows you to prevent capture of the DOSBox window, if an API is provided by the system to do so.\n"
+	    "empty or none: the window is normal and it can be screen captured.\n"
+	    "blank: notify the system so that if a screenshot is attempted, the window appears blank.\n"
+	    "invisible: notify the system not to include the DOSBox window in screen capture.\n"
+	    "\n"
+	    "This option may be useful if you would like to prevent your DOS gaming from appearing in the Windows 11 Recall feature");
 
     Pint = secprop->Add_int("vmemsize", Property::Changeable::WhenIdle,-1);
     Pint->SetMinMax(-1,16);
@@ -4300,6 +4426,10 @@ void DOSBOX_SetupConfigSections(void) {
     Pstring->Set_help("The files or directories listed here (separated by space) will be either hidden or removed from the Z drive.\n"
                       "Files with leading forward slashes (e.g. \"/DEBUG\\BIOSTEST.COM\") will become hidden files (DIR /A will list them).");
 
+    Pbool = secprop->Add_bool("automount drive directories",Property::Changeable::OnlyAtStart, false);
+    Pbool->Set_help("If set, DOSBox-X will automatically mount existing drive directories from C drive to Y drive, e.g. \"DriveC\".\n"
+                    "NOTE: This option is only available under Windows.");
+
     Pbool = secprop->Add_bool("hidenonrepresentable",Property::Changeable::WhenIdle,true);
     Pbool->Set_help("If set, DOSBox-X will hide files on local drives that are non-representative in the current DOS code page.\n"
                     "This may be required for some programs such as Windows 3.x Setup if the drives contain international filenames.");
@@ -4685,8 +4815,9 @@ void DOSBOX_SetupConfigSections(void) {
 			"It has no effect if \"dos clipboard device enable\" is disabled, and it is deactivated if the secure mode is enabled.");
     Pstring->SetBasic(true);
 
-    Pbool = secprop->Add_bool("dos clipboard api",Property::Changeable::WhenIdle, true);
-    Pbool->Set_help("If set, DOS APIs for communications with the Windows clipboard will be enabled for shared clipboard communications.");
+    Pbool = secprop->Add_bool("dos clipboard api",Property::Changeable::WhenIdle, false);
+    Pbool->Set_help("If set, DOS APIs for communications with the Windows clipboard will be enabled for shared clipboard communications.\n"
+		    "Caution: Enabling this API may cause some programs to think they are running under Windows");
     Pbool->SetBasic(true);
 
     Pbool = secprop->Add_bool("dos idle api",Property::Changeable::OnlyAtStart,true);
@@ -4985,11 +5116,11 @@ void DOSBOX_SetupConfigSections(void) {
     Pstring = secprop->Add_string("dos",Property::Changeable::OnlyAtStart,"high, umb");
 	Pstring->Set_help("Reports whether DOS occupies HMA and allocates UMB memory (if available).");
     Pstring->SetBasic(true);
-    Pint = secprop->Add_int("fcbs",Property::Changeable::OnlyAtStart,100);
-    Pint->Set_help("Number of FCB handles available to DOS programs (1-255).");
+    Pint = secprop->Add_int("fcbs",Property::Changeable::OnlyAtStart,0);
+    Pint->Set_help("Number of FCB handles available to DOS programs (1-255). Set to 0 to automatically use a reasonable default.");
     Pint->SetBasic(true);
-    Pint = secprop->Add_int("files",Property::Changeable::OnlyAtStart,200);
-    Pint->Set_help("Number of file handles available to DOS programs (8-255).");
+    Pint = secprop->Add_int("files",Property::Changeable::OnlyAtStart,0);
+    Pint->Set_help("Number of file handles available to DOS programs (8-255). Set to 0 to automatically use a reasonable default.");
     Pint->SetBasic(true);
     Pstring = secprop->Add_string("country",Property::Changeable::OnlyAtStart,"");
     Pstring->Set_help("Country code for date/time/decimal formats and optionally code page for TTF output and language files.");

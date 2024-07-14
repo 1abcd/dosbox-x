@@ -124,7 +124,7 @@ jobs:
           cd $top
           ls -lg
       - name: Upload preview package(VS x86/x64)
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4.3.4
         with:
           name: dosbox-x-vsbuild-win-x86_x64-${{ env.timestamp }}
           path: ${{ github.workspace }}/package/
@@ -145,7 +145,7 @@ jobs:
           $top/vs/tool/zip.exe -r -9 "$top/dosbox-x-vsbuild-ARM32_64-${{ env.timestamp }}.zip" "*"
           cd $top
       - name: Upload preview package(ARM 32/64-bit)
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4.3.4
         with:
           name: dosbox-x-vsbuild-ARM32_64-${{ env.timestamp }}
           path: ${{ github.workspace }}/package/
@@ -219,7 +219,7 @@ jobs:
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: actions/cache/save@v4
         with:
-          path: ${{ github.workspace }}/vs-bin
+          path: ${{ github.workspace }}/mingw-x86-bin
           key: mingw-x86-bin-r-${{ github.sha }}
   MinGW64_CI_build:
     permissions:
@@ -239,7 +239,7 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: git mingw-w64-x86_64-toolchain mingw-w64-x86_64-libslirp mingw-w64-x86_64-libtool mingw-w64-x86_64-nasm autoconf automake
+          install: git make mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool mingw-w64-x86_64-nasm autoconf automake mingw-w64-x86_64-libslirp
       - name: Update build info
         shell: bash
         run: |
@@ -255,7 +255,6 @@ jobs:
       - name: Build MinGW64 SDL1
         run: |
           top=`pwd`
-          ln -s $top/build-scripts/mingw/lowend-bin/make.exe /usr/bin/make.exe
           ./build-mingw
           strip -s $top/src/dosbox-x.exe
           mkdir -p $top/package/
@@ -279,7 +278,7 @@ jobs:
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: actions/cache/save@v4
         with:
-          path: ${{ github.workspace }}/vs-bin
+          path: ${{ github.workspace }}/mingw-x64-bin
           key: mingw-x64-bin-r-${{ github.sha }}
   Build_Windows_Installer:
     permissions:
@@ -362,7 +361,7 @@ jobs:
           cd $top/package/
           cd $top
       - name: Upload preview package (MinGW)
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4.3.4
         with:
           name: dosbox-x-mingw-x86_x64-${{ env.timestamp }}
           path: ${{ github.workspace }}/package/
@@ -388,7 +387,7 @@ jobs:
           cd contrib/windows/installer/
           ISCC.exe ./DOSBox-X-installer.iss
       - name: Upload preview installer
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4.3.4
         with:
           name: dosbox-x-windows-${{ env.timestamp }}-setup.exe
           path: contrib/windows/installer/dosbox-x-windows*.exe
