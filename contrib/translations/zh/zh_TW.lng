@@ -2622,13 +2622,13 @@ AMD Athlon 600MHz (約 306000 個週期)
 螢幕擷取控制
 .
 :MENU:prevcap_none
-允許出現
+允許
 .
 :MENU:prevcap_blank
 顯示為空白
 .
 :MENU:prevcap_invisible
-不出現
+不可看見
 .
 :MENU:VideoScalerMenu
 縮放器
