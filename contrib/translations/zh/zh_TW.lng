@@ -1362,14 +1362,9 @@ VHD "%s" 的類型是 %s.
 父磁碟 "%s" 內容可能已毀損!
 
 .
-:PROGRAM_VHDMAKE_ABSPATH_WIN
-警告: 鏈結至父磁碟的絕對路徑在 Windows 上限制了檔案可攜性.
-請優先選擇相對路徑給差異映像檔!
-
-.
-:PROGRAM_VHDMAKE_ABSPATH_UX
-錯誤: 鏈結至父磁碟的絕對路徑禁止了檔案可攜性.
-要使用相對路徑給差異映像檔!
+:PROGRAM_VHDMAKE_ABSPATH
+警告: 鏈結至父檔案的絕對路徑禁止了檔案可攜性.
+請優先使用差異映像檔的相對路徑!
 
 .
 :PROGRAM_VHDMAKE_HELP
