@@ -1359,7 +1359,7 @@ VHD "%s" 的類型是 %s.
 合併過程失敗, 中止程序!
 .
 :PROGRAM_VHDMAKE_MERGEWARNCORRUPTION
-父磁碟 "%s" 內容可能已毀損!
+父檔案 "%s" 內容可能已毀損!
 
 .
 :PROGRAM_VHDMAKE_ABSPATH
@@ -1380,7 +1380,7 @@ VHD "%s" 的類型是 %s.
                 映像檔 parent.vhd
  -f | -force    強制覆寫先前存在的映像檔
  -i | -info     顯示關於 a.vhd 映像檔的實用資訊
- -m | -merge    將差異 delta.vhd 的變化合併到它的父磁碟
+ -m | -merge    將差異 delta.vhd 的變化合併到它的父檔案
  new.vhd        建立新的動態擴充 VHD 映像檔名稱
  size           磁碟大小 (最後面加上大小單位, 位元組 B 隱含在裡面)
 當轉換一個原始磁碟映像到大小固定的 VHD, 這個磁碟映像必須以 MBR 配置分割,
