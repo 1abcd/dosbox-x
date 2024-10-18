@@ -2715,6 +2715,9 @@ xBRZ
 :MENU:scaler_set_xbrz_bilinear
 xBRZ Bilinear
 .
+:MENU:center_window
+視窗置中
+.
 :MENU:set_titletext
 設定標題列文字...
 .
