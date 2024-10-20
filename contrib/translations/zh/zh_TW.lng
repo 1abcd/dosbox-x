@@ -2319,7 +2319,7 @@ TRUENAME [/H] 檔案
 
 .
 :SHELL_CMD_DXCAPTURE_HELP_LONG
-DX-CAPTURE [/V|/-V] [/A|/-A] [/M|/-M] [O|/-O] [command] [options]
+DX-CAPTURE [/V|/-V] [/A|/-A] [/M|/-M] [O|/-O] [命令] [選項]
 
 將開始進行影像或音訊擷取、執行程式, 然後在程式結束時自動停止擷取.
 /V 為影像、/A 為音訊、/M 為多軌音訊, 以及 /O 為 OPL FM (DROv2 格式)
