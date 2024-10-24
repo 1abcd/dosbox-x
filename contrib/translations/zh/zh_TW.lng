@@ -1188,7 +1188,7 @@ BIOSTEST 映像檔
 
 .
 :PROGRAM_IMGMAKE_PRINT_CHS
-建立了映像檔 "%s" 包含 %u 個磁柱, %u 個磁頭和 %u 個磁區
+建立映像檔 "%s", 包含了 %u 個磁柱、%u 個磁頭和 %u 個磁區
 
 .
 :PROGRAM_IMGMAKE_CANT_READ_FLOPPY
@@ -1621,7 +1621,7 @@ GOTO: 標籤 %s 找不到.
 
 .
 :SHELL_CMD_DIR_BYTES_FREE
-%5d 個目錄 %18s 可用位元組
+%5d 個目錄 %18s 位元組可用
 
 .
 :SHELL_CMD_DIR_FILES_LISTED
