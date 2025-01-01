@@ -1,7 +1,7 @@
 :DOSBOX-X:LANGUAGE:Traditional Chinese
 :DOSBOX-X:CODEPAGE:950
 :DOSBOX-X:VERSION:2025.01.01
-:DOSBOX-X:REMARK:建議將國家和字碼頁設為 886,950 並搭配中文字型; 或使用 cht 或 tw 中文 DOS/V 模式以直接支援中文顯示和列印
+:DOSBOX-X:REMARK:可將國家和字碼頁設為 886,950 並選擇適當的 TrueType 字型來進行中文顯示和列印
 :AUTOEXEC_CONFIGFILE_HELP
 區段中的指令行會在啟動時執行.
 您可以在這裡下達 MOUNT 指令.
@@ -309,10 +309,10 @@ DOSBox-X 命令列組態工具. 支援的選項有:
 -ln (或 -langname) 顯示 (不加引數時) 或指定語言名稱.
 -wcp [檔名] 將組態檔案寫入程式目錄 (dosbox-x.conf 或指定檔名).
 -wcd 寫入設定目錄中的預設組態檔案.
--all, -mod 與 -wc、-wcp 或 -wcd 一起使用以寫入「所有的」或者修改過的組態選項.
--wcboot、-wcpboot 或 -wcdboot 將在寫入組態檔案後自動重開 DOSBox-X.
+-all, -mod 與 -wc、-wcp、或 -wcd 一起使用以寫入「所有的」或者修改過的組態選項.
+-wcboot、-wcpboot、或 -wcdboot 將在寫入組態檔案後自動重開 DOSBox-X.
 -bootconf (或 -bc) 重開 DOSBox-X 並載入指定的組態檔案 (或已載入的主組態檔案).
--norem 與 -wc、-wcp 或 -wcd 一起使用時不寫入組態檔案的註解.
+-norem 與 -wc、-wcp、或 -wcd 一起使用時不寫入組態檔案的註解.
 -l 列出 DOSBox-X 程式的設定參數.
 -h, -help, -? 顯示本說明; 加上英文單字 "sections" 以顯示區段清單.
 -h, -help, -? 區段 或 屬性 顯示指定區段或屬性的資訊.
@@ -668,7 +668,7 @@ MSCDEX 錯誤: 無效的檔案或無法開啟檔案.
 
 .
 :MSCDEX_TOO_MANY_DRIVES
-MSCDEX 錯誤: 光碟機數量過多 (最多5個). MSCDEX 安裝失敗.
+MSCDEX 錯誤: 光碟機數量過多 (最多5台). MSCDEX 安裝失敗.
 
 .
 :MSCDEX_LIMITED_SUPPORT
@@ -688,7 +688,7 @@ MSCDEX 錯誤: 未知錯誤.
 
 .
 :PROGRAM_INTRO
-[2J[32;1m歡迎使用 DOSBox-X[0m, 支援聲音和影像且開放原始碼的 x86 模擬器.
+[2J[32;1m歡迎使用 DOSBox-X[0m, 支援聲音和圖像且開放原始碼的 x86 模擬器.
 DOSBox-X 建立一個 DOS 環境讓您彷彿正在使用原本的 DOS 系統.
 
 [31;1mDOSBox-X 如果遇到錯誤將會在未警告的情況下停止運作或結束![0m
@@ -887,7 +887,7 @@ DOSBox-X 提供多程度的光碟機模擬.
 您可以在此命令中使用多個軟碟映像檔, 並可透過選單指令進行切換.
 "磁碟機:" 將從指定的已掛載的磁碟機開機. 如果沒有指定磁碟機代號,
 將預設從磁碟機 A: 開機. 如果沒有指定參數將試著從目前磁碟機開機.
-只支援從以下磁碟機代號開機: A:、C:, 以及 D:. 如果要從硬碟機
+只支援從以下磁碟機代號開機: A:、C:、以及 D:. 如果要從硬碟機
 (C: 或 D:) 開機, 請保證映像檔已用 [34;1mIMGMOUNT[0m 命令掛載.
 
 此命令的語法為如下之一:
@@ -1136,14 +1136,14 @@ BIOSTEST 映像檔
      hd_8gig: 8GB, hd_st251: 40MB, hd_st225: 20MB (舊磁碟機版面)
     [33;1m自訂硬碟:[0m hd vhd (需要 -size 或 -chs)
   -size: 自訂硬碟映像的大小 MB 數 (vhd: 上限 2088960).
-  -chs: CHS 磁碟版面: 磁柱(1-1023),磁頭(1-255),磁區(1-63).
+  -chs: 使用 磁柱(1-1023),磁頭(1-255),磁區(1-63) 的磁碟版面.
   -nofs: 如果想建立空白映像檔請加入此參數.
   -force: 覆寫已存在的映像檔. -chs / -lba: 選擇 C/H/S 或者 LBA.
   -bat: 建立一個包含 IMGMOUNT 命令的批次檔以掛載此映像檔.
-  -fat: 檔案系統類型 (12、16, 或 32). -fatcopies: FAT 表格複本數.
+  -fat: 檔案系統類型 (12、16、或 32). -fatcopies: FAT 表格複本數.
   -spc: 每個磁簇所包含的磁區數 (必須為 2 的冪次方). -label 磁碟機標籤.
   -rootdir: 根目錄下的項目數. -partofs: 硬碟分割區開始位置.
-  -align: 對齊檔案系統結構. 指定磁區數, 或在字尾加上 'K' 對應 KB.
+  -align: 對齊檔案系統結構. 指定磁區數, 或在字尾加上 'K' 以對應 KB.
   -source: 軟碟機代號 - 如果指定了此參數, 映像檔將從軟碟機中的磁片讀取.
   -retries: 當試圖從已損壞磁片中讀取時所需的重試次數 (1-99).
   [32;1m-examples: 顯示用法舉例.[0m
@@ -1185,7 +1185,7 @@ BIOSTEST 映像檔
 
 .
 :PROGRAM_IMGMAKE_PRINT_CHS
-建立映像檔 "%s", 包含了 %u 個磁柱、%u 個磁頭和 %u 個磁區
+建立映像檔 "%s", 包含了 %u 個磁柱、%u 個磁頭、和 %u 個磁區
 
 .
 :PROGRAM_IMGMAKE_CANT_READ_FLOPPY
@@ -1278,8 +1278,8 @@ LABEL [磁碟機:][標籤]
 :PROGRAM_MODE_USAGE
 設定系統裝置.
 
-[34;1mMODE[0m 顯示類型           :顯示類型的代碼有 [1mCO80[0m、[1mBW80[0m、[1mCO40[0m、[1mBW40[0m, 或 [1mMONO[0m
-[34;1mMODE CON COLS=[0mc [34;1mLINES=[0mn :欄數與列數, c=80 或 132, n=25、43、50, 或 60
+[34;1mMODE[0m 顯示類型           :顯示類型的代碼有 [1mCO80[0m、[1mBW80[0m、[1mCO40[0m、[1mBW40[0m、或 [1mMONO[0m
+[34;1mMODE CON COLS=[0mc [34;1mLINES=[0mn :欄數與列數, c=80 或 132, n=25、43、50、或 60
 [34;1mMODE CON RATE=[0mr [34;1mDELAY=[0md :鍵盤輸入速率與延遲, r=1-32 (32=最快), d=1-4 (1=最低)
 
 .
@@ -1360,8 +1360,8 @@ VHD "%s" 的類型是 %s.
 
 .
 :PROGRAM_VHDMAKE_ABSPATH
-警告: 鏈結至父檔案的絕對路徑禁止了檔案可攜性.
-請優先使用差異映像檔的相對路徑!
+警告: 鏈結至父檔案的絕對路徑阻止了檔案可攜性.
+請優先使用差異映像檔之相對路徑!
 
 .
 :PROGRAM_VHDMAKE_HELP
@@ -1532,7 +1532,7 @@ TIME [[/T] [/H] | 時間]
 
 .
 :SHELL_CMD_RMDIR_ERROR
-路徑無效、不是目錄, 或目錄非空 - %s
+路徑無效、不是目錄、或目錄非空 - %s
 
 .
 :SHELL_CMD_RMDIR_FULLTREE_CONFIRM
@@ -2506,31 +2506,31 @@ CPU 類型
 486DX5 133MHz (約 47810 個週期)
 .
 :MENU:cpu586-60
-奔騰 60MHz (約 31545 個週期)
+奔騰 60MHz (約 32090 個週期)
 .
 :MENU:cpu586-66
 奔騰 66MHz (約 35620 個週期)
 .
 :MENU:cpu586-75
-奔騰 75MHz (約 43500 個週期)
+奔騰 75MHz (約 40072 個週期)
 .
 :MENU:cpu586-90
-奔騰 90MHz (約 52000 個週期)
+奔騰 90MHz (約 48087 個週期)
 .
 :MENU:cpu586-100
-奔騰 100MHz (約 60000 個週期)
+奔騰 100MHz (約 53430 個週期)
 .
 :MENU:cpu586-120
-奔騰 120MHz (約 74000 個週期)
+奔騰 120MHz (約 64180 個週期)
 .
 :MENU:cpu586-133
-奔騰 133MHz (約 80000 個週期)
+奔騰 133MHz (約 71240 個週期)
 .
 :MENU:cpu586-166
-奔騰 166MHz MMX (約 97240 個週期)
+奔騰 166MHz MMX (約 95548 個週期)
 .
-:MENU:cpuak6-166
-AMD K6 166MHz (約 110000 個週期)
+:MENU:cpu586-200
+奔騰 200MHz MMX (約 114657 個週期)
 .
 :MENU:cpuak6-200
 AMD K6 200MHz (約 130000 個週期)
@@ -2713,7 +2713,7 @@ xBRZ
 xBRZ Bilinear
 .
 :MENU:center_window
-Center window
+將視窗置中
 .
 :MENU:set_titletext
 設定標題列文字...
@@ -2932,10 +2932,10 @@ PC-98 選項
 Glide 直通
 .
 :MENU:load_d3d_shader
-選擇 Direct3D 像素著色檔案...
+選擇 Direct3D 像素著色器...
 .
 :MENU:load_glsl_shader
-選擇 OpenGL (GLSL) 著色檔案...
+選擇 OpenGL (GLSL) 著色器...
 .
 :MENU:load_ttf_font
 選擇 TrueType 字型 (TTF/OTF)...
@@ -3586,7 +3586,7 @@ Alt+Shift
 顯示偵錯工具
 .
 :MAPPER:decsize
-Decrease TTF size
+縮小 TTF 字型
 .
 :MAPPER:dynamic
 CPU: 動態核心
@@ -3598,7 +3598,7 @@ CPU: 動態核心
 CPU: 完全核心
 .
 :MAPPER:incsize
-Increase TTF size
+放大 TTF 字型
 .
 :MAPPER:loadmap
 載入對應表檔案
@@ -3610,13 +3610,13 @@ Increase TTF size
 CPU: 一般核心
 .
 :MAPPER:paste
-Paste from clipboard
+將剪貼簿內容貼上
 .
 :MAPPER:pasteend
-Stop clipboard paste
+停止將剪貼簿內容貼上
 .
 :MAPPER:pauseints
-Pause with interrupt
+暫停並啟用插斷
 .
 :MAPPER:prevslot
 上一個儲存欄位
@@ -3631,7 +3631,7 @@ Pause with interrupt
 重開 DOS 系統
 .
 :MAPPER:recmtwave
-Record to multi-track AVI
+錄製音訊到多軌 AVI
 .
 :MAPPER:rescanall
 重新整理磁碟機
@@ -3643,7 +3643,7 @@ Record to multi-track AVI
 重設色彩配置
 .
 :MAPPER:showstate
-Display state info
+顯示狀態資訊
 .
 :MAPPER:simple
 CPU: 簡單核心
