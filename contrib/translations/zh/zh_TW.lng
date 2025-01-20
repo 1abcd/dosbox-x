@@ -428,7 +428,7 @@ MOUSE [/?] [/U] [/V]
 
 .
 :PROGRAM_MOUNT_CDROMS_FOUND
-找到的光碟機數: %d
+找到的光碟機數: %d 台
 
 .
 :PROGRAM_MOUNT_STATUS_FORMAT
@@ -652,7 +652,7 @@ MSCDEX 已安裝.
 
 .
 :MSCDEX_ERROR_MULTIPLE_CDROMS
-MSCDEX 錯誤: 多個光碟機的英文代號應保持連續.
+MSCDEX 錯誤: 多台光碟機的英文代號應保持連續.
 
 .
 :MSCDEX_ERROR_NOT_SUPPORTED
