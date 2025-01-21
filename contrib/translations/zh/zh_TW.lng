@@ -896,8 +896,8 @@ DOSBox-X 提供多程度的光碟機模擬.
 
 [34;1mBOOT diskimg1.img [diskimg2.img ...] [-L 磁碟機代號][0m
 
-備註: 如果 "leading colon write protect image" 組態選項已啟用,
-      加上冒號 (:) 前導字元的映像檔將會以防寫模式開機.
+備註: 如果啟用 "leading colon write protect image" 組態選項,
+      帶有冒號 (:) 前導字元的映像檔, 將會以防寫模式開機.
 
 舉例:
 
