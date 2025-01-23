@@ -731,7 +731,7 @@ DOSBox-X 建立一個 DOS 環境讓您彷彿正在使用原本的 DOS 系統.
 .
 :PROGRAM_INTRO_MENU_INFO_HELP
 
-[1m   [1m[K怎樣獲得關於 DOSBox-X 的更多資訊.[0m
+[1m   [1m[K如何獲得更多關於 DOSBox-X 的資訊.[0m
 
 .
 :PROGRAM_INTRO_MENU_QUIT_HELP
@@ -814,7 +814,7 @@ dosbox-x [名稱] [-exit] [-version] [-fastlaunch] [-fullscreen]
 
 [34;1mhttps://dosbox-x.com/[0m 或 [34;1mhttp://dosbox-x.software[0m
 
-關於 DOSBox-X 的更多資訊, 請造訪其 Wiki 系統:
+更多關於 DOSBox-X 的資訊, 請造訪其 Wiki 系統:
 
 [34;1mhttps://dosbox-x.com/wiki[0m
 
