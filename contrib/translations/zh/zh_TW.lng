@@ -1345,7 +1345,7 @@ VHD "%s" 的類型是 %s.
 
 .
 :PROGRAM_VHDMAKE_MERGENODELETE
-不能移除快照 "%s", 必須要您自己動手移除!
+不能移除快照 "%s", 必須要由您自己動手移除!
 
 .
 :PROGRAM_VHDMAKE_MERGEOKDELETE
