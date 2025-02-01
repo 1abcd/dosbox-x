@@ -2343,28 +2343,28 @@ DEBUGBOX [命令] [選項]
 
 .
 :SHELL_STARTUP_HEAD1_PC98
-[36mGetting Started with DOSBox-X:[37m                                    
+[36m輕鬆上手 DOSBox-X:[37m                                                
 .
 :SHELL_STARTUP_TEXT1_PC98
-Type [32mHELP[37m for shell commands, and [32mINTRO[37m for a short introduction. 
-You could also complete various tasks through the [33mdrop-down menus[37m.
+輸入 [32mHELP[37m 命令檢視 DOS 命令清單，輸入 [32mINTRO[37m 命令進入簡短介紹。    
+汝同樣可以透過 DOSBox-X 所帶的[33m下拉式選單[37m來完成各種操作和功能。    
 .
 :SHELL_STARTUP_EXAMPLE_PC98
-[32mExample[37m: Try select [33mTrueType font[37m or [33mOpenGL perfect[37m output option.
+[32m舉例[37m：汝可以試著選擇 [33mTrueType 字型[37m或者 [33mOpenGL perfect[37m 輸出選項。  
 .
 :SHELL_STARTUP_TEXT2_PC98
-To launch the [33mConfiguration Tool[37m, use [31mhost+C[37m. Host key is [32mF11[37m.    
-To activate the [33mMapper Editor[37m for key assignments, use [31mhost+M[37m.    
-To switch between windowed and full-screen mode, use [31mhost+F[37m.      
-To adjust the emulated CPU speed, use [31mhost+Plus[37m and [31mhost+Minus[37m.   
+啓動[33m組態工具[37m，使用 [31mhost+C[37m。其中 host 按鍵是 [32mF11[37m。                 
+啓動[33m對應表編輯器[37m（按鍵設定），使用 [31mhost+M[37m。                       
+切換視窗和全螢幕模式，使用 [31mhost+F[37m。                               
+調整 CPU 模擬速度，使用 [31mhost+加號[37m 與 [31mhost+減號[37m。                  
 .
 :SHELL_STARTUP_INFO_PC98
-[36mDOSBox-X is now running in [32mJapanese NEC PC-98[36m emulation mode.[37m     
+[36mDOSBox-X 目前在[32m日本 NEC PC-98[36m 模擬模式下運作。[37m                    
 .
 :SHELL_STARTUP_TEXT3_PC98
-[32mDOSBox-X project [33mhttps://dosbox-x.com/     [36mComplete DOS emulations[37m
-[32mDOSBox-X guide   [33mhttps://dosbox-x.com/wiki[37m [36mDOS, Windows 3.x and 9x[37m
-[32mDOSBox-X support [33mhttps://github.com/joncampbell123/dosbox-x/issues[37m
+[32mDOSBox-X 專案 [33mhttps://dosbox-x.com/        [36mComplete DOS emulations[37m
+[32mDOSBox-X 指南 [33mhttps://dosbox-x.com/wiki   [37m [36mDOS, Windows 3.x and 9x[37m
+[32mDOSBox-X 支援 [33mhttps://github.com/joncampbell123/dosbox-x/issues[37m   
 .
 :SHELL_STARTUP_DOSV
 [32mDOS/V 模式[37m正在執行中。 您亦可以使用[32m中/日/韓 TTF 模式[37m來模擬標準的 DOS 環境。 
