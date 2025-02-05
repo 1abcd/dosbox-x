@@ -100,14 +100,8 @@ DOSBox-X 組態工具
 :HELP_FOR
 %s 的說明
 .
-:HELP_INFO
-按一下下方 [說明] 按鈕檢視詳細說明資訊.
-.
 :SELECT_VALUE
 選擇屬性值
-.
-:CONFIGURATION_FOR
-%s 的組態
 .
 :CONFIGURATION
 組態
@@ -162,9 +156,6 @@ MIDI 裝置組態資訊
 .
 :INTRODUCTION
 介紹
-.
-:CONFIGURE_GROUP
-選擇設定組進行組態編輯:
 .
 :SHOW_ADVOPT
 顯示進階選項
