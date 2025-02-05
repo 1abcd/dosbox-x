@@ -1,7 +1,8 @@
 :DOSBOX-X:LANGUAGE:Traditional Chinese
 :DOSBOX-X:CODEPAGE:950
 :DOSBOX-X:VERSION:2025.01.01
-:DOSBOX-X:REMARK:國家和字碼頁可以設為「886,950」並選擇適當的 TrueType 字型來進行中文顯示和列印。譯者註：適用於 PC-98 模式的中文語言，可以至 https://github.com/1abcd/dosbox-x/issues/2 下載。
+:DOSBOX-X:REMARK:國家和字碼頁可以設為「886,950」並選擇適當的 TrueType 字型來進行中文顯示和列印。
+:DOSBOX-X:REMARK:可至 https://github.com/1abcd/dosbox-x/issues/2 下載適用於 PC-98 模式的中文語言。
 :AUTOEXEC_CONFIGFILE_HELP
 區段中的指令行會在啟動時執行.
 您可以在這裡下達 MOUNT 指令.
