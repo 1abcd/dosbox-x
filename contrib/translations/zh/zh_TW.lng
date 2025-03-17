@@ -1,7 +1,7 @@
 :DOSBOX-X:LANGUAGE:Traditional Chinese
 :DOSBOX-X:CODEPAGE:950
 :DOSBOX-X:VERSION:2025.02.01
-:DOSBOX-X:REMARK:國家和字碼頁可以設為「886,950」並選擇適合的中文字型來進行中文顯示和列印。譯者註：country 選項現在為選填，在較新版 DOSBox-X 會根據語言檔載入指定字碼頁。若需要 932 字碼頁的中文語言檔，可至 https://github.com/1abcd/dosbox-x/issues/2 下載。
+:DOSBOX-X:REMARK:國家和字碼頁可以設為「886,950」並選擇適合的中文字型來進行中文顯示和列印。譯者註：現在新版 DOSBox-X 會根據語言檔載入指定字碼頁，所以 country 是選填選項。若需要 932 字碼頁的中文語言檔，可至 https://github.com/1abcd/dosbox-x/issues/2 下載。
 :AUTOEXEC_CONFIGFILE_HELP
 區段中的指令行會在啟動時執行.
 您可以在這裡下達 MOUNT 指令.
