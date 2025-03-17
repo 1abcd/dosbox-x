@@ -1,8 +1,7 @@
 :DOSBOX-X:LANGUAGE:Traditional Chinese
 :DOSBOX-X:CODEPAGE:950
 :DOSBOX-X:VERSION:2025.02.01
-:DOSBOX-X:REMARK:國家和字碼頁可以設為「886,950」並選擇適合的中文字型來進行中文顯示和列印。
-:DOSBOX-X:REMARK:譯者註：可至 https://github.com/1abcd/dosbox-x/issues/2 下載適用於 PC-98 模式的中文語言。
+:DOSBOX-X:REMARK:國家和字碼頁可以設為「886,950」並選擇適合的中文字型來進行中文顯示和列印。譯者註：country 選項現在為選填，在較新版 DOSBox-X 會根據語言檔載入指定字碼頁。若需要 932 字碼頁的中文語言檔，可至 https://github.com/1abcd/dosbox-x/issues/2 下載。
 :AUTOEXEC_CONFIGFILE_HELP
 區段中的指令行會在啟動時執行.
 您可以在這裡下達 MOUNT 指令.
@@ -2040,7 +2039,8 @@ COPY [/Y | /-Y] 來源檔案 [+來源檔案 [+ ...]] [目的名稱]
   /Y            覆寫現存目的檔案時不進行確認.
   /-Y           覆寫現存目的檔案時進行確認.
 
-選項 /Y 可能會在 COPYCMD 環境變數中預先設定. 可以在命令列中使用 /-Y 選項進行覆蓋.
+選項 /Y 可能會在 COPYCMD 環境變數中預先設定.
+可以在命令列中使用 /-Y 選項進行覆蓋.
 
 要連接檔案, 指定一個目的檔案, 及數個來源檔案
 (使用萬用字元或 檔案1+檔案2+檔案3 格式).
@@ -3842,7 +3842,7 @@ PROGRAM_IMGMAKE_VOLUME_ALIGN
 健全性測試失敗: 磁碟區大小未對齊
 .
 :PROGRAM_IMGMAKE_FAT_ALIGN
-健全性測試失敗: FAT 表格數未對齊
+健全性測試失敗: FAT 表格未對齊
 .
 :PROGRAM_IMGMAKE_SECTPERFAT
 錯誤: 產生的檔案系統中的每一個 FAT 佔有的磁區數超過 256 個, 而且檔案系統不是 FAT32
@@ -3879,7 +3879,7 @@ XMS 控制代碼 %u: 無法釋放
 EMS 區塊已配置用量 (%uKB)
 .
 :PROGRAM_LOADFIX_EMS_ALLOCERROR
-無法配置用量到 EMS 區塊
+無法在 EMS 區塊配置用量
 .
 PROGRAM_LOADFIX_NOEMS
 EMS 未作用
@@ -3888,7 +3888,7 @@ EMS 未作用
 XMS 區塊已配置用量 (%uKB)
 .
 :PROGRAM_LOADFIX_XMS_ALLOCERROR
-無法配置用量到 XMS 區塊
+無法在 XMS 區塊配置用量
 .
 :PROGRAM_LOADFIX_NOXMS
 XMS 未作用
@@ -3921,7 +3921,7 @@ START [+|-|_] 命令 [引數]
   命令: 要啟動的命令、程式、或檔案.
   引數: 傳遞給應用程式的引數.
   
-START 自動開啟 Windows 命令提示字元來執行這些命令,
+START 自動開啟 Windows 命令提示字元來執行這些命令時,
 會等待按鍵按下才結束 (由 "startincon" 選項指定):
 %s
 
@@ -4075,7 +4075,7 @@ CAPMOUSE [/C|/R]
 已釋放
 .
 :PROGRAM_AUTOTYPE_HELP
-將指令碼的鍵盤按鈕項目輸入到執行中的 DOS 程式.
+對執行中的 DOS 程式執行指令碼的鍵盤按鈕輸入.
 
 AUTOTYPE [-list] [-w WAIT] [-p PACE] button_1 [button_2 [...]]
 
@@ -4107,11 +4107,12 @@ AUTOTYPE: %s 的值 '%s' 不是有效的浮點數
 
 ADDKEY [p毫秒] [按鍵]
 
-例如, 下面的命令鍵入 "dir" 接著在 1 秒之後輸入 ENTER:
+例如, 下面的命令鍵入 "dir" 接著在 1 秒之後鍵入 ENTER:
 
 ADDKEY p1000 d i r enter
 
-您也可以嘗試改用 AUTOTYPE 命令, 以執行將指令碼的鍵盤按鈕項目輸入到執行中的 DOS 程式.
+您也可以嘗試改用 AUTOTYPE 命令, 來對執行中的 DOS 程式執行指令碼的鍵盤按鈕輸入.
+
 .
 :PROGRAM_SETCOLOR_HELP
 檢視或變更文字模式的色彩配置設定.
