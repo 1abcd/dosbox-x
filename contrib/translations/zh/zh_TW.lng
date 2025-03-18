@@ -3786,7 +3786,7 @@ BIOS 的磁碟索引沒有已指派的映像檔.
 .
 :PROGRAM_IMGMOUNT_CHOOSE_LETTER
 與標準的 INT 13h 硬碟配額衝突, 分割區無法被掛載.
-選擇不同的磁碟機代號來掛載.
+選擇掛載至不同的磁碟機代號.
 .
 :PROGRAM_ELTORITO_LETTER
 可開機光碟 (El Torito) 模擬需要一個合適的光碟機代號.
