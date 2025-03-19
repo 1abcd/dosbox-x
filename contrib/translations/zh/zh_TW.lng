@@ -1003,11 +1003,11 @@ BIOSTEST 映像檔
 
 .
 :PROGRAM_IMGMOUNT_SPECIFY_DRIVE
-必須指定要掛載的磁碟機代號.
+必須指定要將映像檔掛載到的磁碟機代號.
 
 .
 :PROGRAM_IMGMOUNT_SPECIFY2
-必須指定磁碟機編號 (0 至 %d) 來掛載映像檔 (0,1=fda,fdb;2,3=hda,hdb).
+必須指定要將映像檔掛載到的磁碟機編號 (0 至 %d) (0,1=fda,fdb;2,3=hda,hdb).
 
 .
 :PROGRAM_IMGMOUNT_INVALID_IMAGE
@@ -3786,7 +3786,7 @@ BIOS 的磁碟索引沒有已指派的映像檔.
 .
 :PROGRAM_IMGMOUNT_CHOOSE_LETTER
 與標準的 INT 13h 硬碟配額衝突, 分割區無法被掛載.
-選擇掛載至不同的磁碟機代號.
+選擇掛載到不同的磁碟機代號.
 .
 :PROGRAM_ELTORITO_LETTER
 可開機光碟 (El Torito) 模擬需要一個合適的光碟機代號.
