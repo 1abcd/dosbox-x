@@ -2361,7 +2361,7 @@ DEBUGBOX [命令] [選項]
 調整 CPU 模擬速度             使用 [31m主機鍵+加號[37m 與 [31m主機鍵+減號[37m。   
 .
 :SHELL_STARTUP_INFO_PC98
-[36mDOSBox-X 現在於[32m日本 NEC PC-98[36m 模擬模式下執行。[37m                    
+[36mDOSBox-X 正在執行於[32m日本 NEC PC-98[36m 模擬模式。[37m                      
 .
 :SHELL_STARTUP_TEXT3_PC98
 [32mDOSBox-X 首頁 [33mhttps://dosbox-x.com/        [36mComplete DOS emulations[37m
@@ -2369,7 +2369,7 @@ DEBUGBOX [命令] [選項]
 [32mDOSBox-X 支援 [33mhttps://github.com/joncampbell123/dosbox-x/issues[37m   
 .
 :SHELL_STARTUP_DOSV
-[32mDOS/V 模式[37m正在運作中。您亦可以使用[32m中/日/韓 TTF 模式[37m來模擬標準的 DOS 環境。 
+[32mDOS/V 模式[37m正在運作中。汝亦可以使用[32m中/日/韓 TTF 模式[37m來模擬標準的 DOS 環境。  
 .
 :SHELL_STARTUP_CGA_MONO
 按 [31mCtrl+F7[37m 鍵在單色間切換： 綠色、黃褐色、白色.                             
