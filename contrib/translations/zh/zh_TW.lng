@@ -606,7 +606,7 @@ MOUSE [/?] [/U] [/V]
 
 .
 :PROGRAM_MOUNT_OVERLAY_STATUS
-重疊目錄 %s 已被加到磁碟機 %c 上.
+重疊目錄 %s 已掛載加到磁碟機 %c.
 
 .
 :PROGRAM_LOADFIX_ALLOC
