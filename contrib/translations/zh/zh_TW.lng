@@ -459,7 +459,7 @@ MOUSE [/?] [/U] [/V]
 
 .
 :PROGRAM_MOUNT_UNSUPPORTED_EXT
-不支援的副檔名 %s: 已掛載為原始 IMG 映像.
+不支援的副檔名 %s: 已當作原始 IMG 映像來掛載.
 
 .
 :PROGRAM_IMGMOUNT_STATUS_FORMAT
@@ -561,7 +561,7 @@ MOUSE [/?] [/U] [/V]
 
 .
 :PROGRAM_MOUNT_UMOUNT_NOT_MOUNTED
-磁碟機 %c 未掛載.
+磁碟機 %c 未被掛載.
 
 .
 :PROGRAM_MOUNT_UMOUNT_SUCCESS
