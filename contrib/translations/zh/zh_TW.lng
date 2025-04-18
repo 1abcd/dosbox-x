@@ -1067,7 +1067,7 @@ BIOSTEST 映像檔
 
 .
 :PROGRAM_IMGMOUNT_MOUNT_NUMBER
-磁碟機編號 %d 掛載為 %s
+磁碟機編號 %d 被掛載為 %s
 
 .
 :PROGRAM_IMGMOUNT_NON_LOCAL_DRIVE
