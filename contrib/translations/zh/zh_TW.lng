@@ -3976,7 +3976,7 @@ START 命令 [引數]
 qcow2 映像 '%s' 不支援
 .
 :PROGRAM_IMGMOUNT_GEOMETRY_ERROR
-無法偵測版面
+無法檢測磁碟機版面
 .
 :PROGRAM_IMGMOUNT_DOS_VERSION
 掛載這個映像檔需要回報 %u.%u 或更高的 DOS 版本.
