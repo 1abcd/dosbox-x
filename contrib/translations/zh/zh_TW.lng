@@ -1023,7 +1023,7 @@ BIOSTEST 映像檔
 
 .
 :PROGRAM_IMGMOUNT_AUTODET_VALUES
-自動檢測映像檔中的磁碟機版面: -size %u,%u,%u,%u
+自動偵測映像檔中的磁碟機版面: -size %u,%u,%u,%u
 
 .
 :PROGRAM_IMGMOUNT_TYPE_UNSUPPORTED
@@ -1094,7 +1094,7 @@ BIOSTEST 映像檔
  -t hdd|floppy|ram   映像類型為硬碟機 (包括 VHD/HDI 映像)|軟碟機|RAM 磁碟機.
  -fs iso             檔案系統為 ISO 9660 (對於 .iso/.cue 檔案已自動假定).
  -fs fat             檔案系統為 FAT - 支援 FAT12、FAT16 及 FAT32.
- -fs none            不要檢測檔案系統 (在提供磁碟機編號時已自動假定).
+ -fs none            不要偵測檔案系統 (在提供磁碟機編號時已自動假定).
  -reservecyl 數字    在 BIOS 中報告使用比實際更少的磁柱數目.
  -ide 控制器         指定 IDE 控制器 (1m, 1s, 2m, 2s) 以掛載磁碟機.
  -size size|ss,s,h,c 指定大小 KB 數, 或磁區大小和 CHS 版面.
@@ -2436,7 +2436,7 @@ DEBUGBOX [命令] [選項]
 中日韓文字: 切換雙位元組/單位元組模式
 .
 :MENU:mapper_autoboxdraw
-中日韓文字: 自動檢測製表字元
+中日韓文字: 自動偵測製表字元
 .
 :MENU:mapper_incsize
 放大 TTF 字型
@@ -3976,7 +3976,7 @@ START 命令 [引數]
 qcow2 映像 '%s' 不支援
 .
 :PROGRAM_IMGMOUNT_GEOMETRY_ERROR
-無法檢測磁碟機版面
+無法偵測磁碟機版面
 .
 :PROGRAM_IMGMOUNT_DOS_VERSION
 掛載這個映像檔需要回報 %u.%u 或更高的 DOS 版本.
