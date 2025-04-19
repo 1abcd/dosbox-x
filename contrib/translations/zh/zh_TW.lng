@@ -507,7 +507,7 @@ MOUSE [/?] [/U] [/V]
 
 .
 :PROGRAM_MOUNT_ALREADY_MOUNTED
-磁碟機 %c 已被掛載為 %s
+磁碟機 %c 已經用 %s 掛載
 
 .
 :PROGRAM_MOUNT_USAGE
