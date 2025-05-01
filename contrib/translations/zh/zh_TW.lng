@@ -477,7 +477,7 @@ MOUSE [/?] [/U] [/V]
 
 .
 :PROGRAM_IMGSWAP_ERROR
-此磁碟機的位置必須在 1 和 %d 之間.
+提供給此磁碟機的位置必須在 1 和 %d 之間.
 
 .
 :PROGRAM_MOUNT_ERROR_1
