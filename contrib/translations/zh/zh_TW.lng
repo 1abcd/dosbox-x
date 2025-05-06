@@ -575,7 +575,7 @@ MOUSE [/?] [/U] [/V]
 
 .
 :PROGRAM_MOUNT_PHYSFS_ERROR
-無法從此壓縮檔中掛載 PhysFS 磁碟機.
+無法用此壓縮檔掛載 PhysFS 磁碟機.
 
 .
 :PROGRAM_MOUNT_OVERLAY_NO_BASE
@@ -714,7 +714,7 @@ DOSBox-X 建立一個 DOS 環境讓您彷彿正在使用原本的 DOS 系統.
 .
 :PROGRAM_INTRO_MENU_CDROM_HELP
 
-[1m   [1m[K如果在 DOSBox-X 中掛載光碟, 您需要在掛載它們時指定更多的選項.[0m
+[1m   [1m[K如果在 DOSBox-X 中掛載光碟機, 您需要在掛載它們時指定更多的選項.[0m
 
 .
 :PROGRAM_INTRO_MENU_USAGE_HELP
@@ -4312,13 +4312,13 @@ RAM 軟碟映像
 被掛載的檔案路徑太長.
 .
 :PROGRAM_BOOT_FAILED
-磁碟機 %s: 開機失敗.
+磁碟機 %s: 無法開機.
 .
 :PROGRAM_MOUNT_FAILED
-磁碟機 %s: 掛載失敗.
+磁碟機 %s: 無法掛載.
 .
 :PROGRAM_MOUNT_IMAGE
-已掛載 %s 到磁碟機 %s:
+已掛載%s到磁碟機 %s:
 %s %s
 .
 :ARCHIVE
