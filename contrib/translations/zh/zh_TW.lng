@@ -4453,7 +4453,7 @@ INT 2Fh 勾點早已被設定.
 
 您還要載入像素著色器嗎?
 
-(您可以在 pixelshader 的設定值後方加上 'forced' 來略過此訊息, 並強制載入像素著色器)
+(您可以在 pixelshader 的設定值後方加上 'forced' 來強制載入像素著色器並略過此訊息)
 .
 :PIXEL_SHADER_LOADED
 已載入像素著色器 - %s
