@@ -714,7 +714,7 @@ DOSBox-X 建立一個 DOS 環境讓您彷彿正在使用原本的 DOS 系統.
 .
 :PROGRAM_INTRO_MENU_CDROM_HELP
 
-[1m   [1m[K如果在 DOSBox-X 中掛載光碟機, 您需要在掛載它時指定更多的選項.[0m
+[1m   [1m[K如果在 DOSBox-X 中掛載光碟機, 您需要在掛載時指定更多的選項.[0m
 
 .
 :PROGRAM_INTRO_MENU_USAGE_HELP
