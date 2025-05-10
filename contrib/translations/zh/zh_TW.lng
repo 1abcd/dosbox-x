@@ -2357,8 +2357,8 @@ DEBUGBOX [命令] [選項]
 [36mDOSBox-X 正在用日本的 [32mNEC PC-98[36m 模擬模式執行。[37m                    
 .
 :SHELL_STARTUP_TEXT3_PC98
-[32mDOSBox-X 首頁 [33mhttps://dosbox-x.com/        [36mComplete DOS emulations[37m
-[32mDOSBox-X 指南 [33mhttps://dosbox-x.com/wiki   [37m [36mDOS, Windows 3.x and 9x[37m
+[32mDOSBox-X 首頁 [33mhttps://dosbox-x.com/       [36m提 供 完 整 的 DOS 模 擬[37m
+[32mDOSBox-X 指南 [33mhttps://dosbox-x.com/wiki  [37m [36m包括 DOS、視窗 3.x 和 9x[37m
 [32mDOSBox-X 支援 [33mhttps://github.com/joncampbell123/dosbox-x/issues[37m   
 .
 :SHELL_STARTUP_DOSV
