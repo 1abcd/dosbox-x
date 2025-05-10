@@ -4036,7 +4036,7 @@ UTF16 [/BE|/LE] < [磁碟機:][路徑]檔名
 
 VTEXT [模式]
 
-  [模式] 設定值 0、1、2 分別對應: 無 V-text、V-text 1、V-text 2.
+  [模式] 設定值為 0、1、2, 分別對應: 無 V-text、V-text 1、V-text 2.
 
 輸入不含參數的 VTEXT 命令顯示目前的 V-text 模式狀態.
 .
