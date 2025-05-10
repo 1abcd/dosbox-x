@@ -2354,7 +2354,7 @@ DEBUGBOX [命令] [選項]
 調整 CPU 模擬速度            - 使用 [31m主機鍵+加號[37m 與 [31m主機鍵+減號[37m。  
 .
 :SHELL_STARTUP_INFO_PC98
-[36mDOSBox-X 正在執行於[32m日本 NEC PC-98[36m 模擬模式。[37m                      
+[36mDOSBox-X 正在以日本的 [32mNEC PC-98[36m 模擬模式執行。[37m                    
 .
 :SHELL_STARTUP_TEXT3_PC98
 [32mDOSBox-X 首頁 [33mhttps://dosbox-x.com/        [36mComplete DOS emulations[37m
