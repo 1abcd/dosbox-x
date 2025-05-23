@@ -4073,7 +4073,7 @@ CAPMOUSE [/C|/R]
 :PROGRAM_AUTOTYPE_HELP
 對執行中的 DOS 程式執行指令碼的鍵盤項目輸入.
 
-AUTOTYPE [-list] [-w 等待] [-p 間距] 按鈕_1 [按鈕_2 [...]]
+AUTOTYPE [-list] [-w 等待] [-p 間距] 第一個按鈕 [第二個按鈕 [...]]
 
 其中:
   -list:   列出所有可用的按鈕名稱.
