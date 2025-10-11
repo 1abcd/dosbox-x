@@ -3250,7 +3250,7 @@ DOS 命令
 記錄檔案 I/O
 .
 :MENU:mapper_speedlock
-切換至快轉模式
+高速 (快轉): 點放模式
 .
 :MENU:mapper_speedlock2
 高速 (快轉模式)
