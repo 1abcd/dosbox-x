@@ -3250,7 +3250,7 @@ DOS 命令
 記錄檔案 I/O
 .
 :MENU:mapper_speedlock
-高速 (快轉): 點放模式
+高速 (快轉模式): 點放模式
 .
 :MENU:mapper_speedlock2
 高速 (快轉模式)
@@ -3644,6 +3644,12 @@ CPU: 一般核心
 .
 :MAPPER:simple
 CPU: 簡單核心
+.
+:MAPPER:speedlock
+高速 (快轉模式): 點放模式
+.
+:MAPPER:speedlock2
+高速 (快轉模式): 開啟或關閉
 .
 :MAPPER:togmenu
 切換選單列顯示
