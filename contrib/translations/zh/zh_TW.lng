@@ -4247,7 +4247,7 @@ COLOR [屬性]
 如果嘗試執行帶有相同前景和背景色彩的 COLOR 命令,
 ERRORLEVEL 會被 COLOR 命令設定為 1.
 
-舉例: "COLOR fc" 命令會產生亮白色為底的淺紅色.
+舉例: "COLOR fc" 命令會產生亮白色為底的淺紅色字.
 
 .
 :ERROR
