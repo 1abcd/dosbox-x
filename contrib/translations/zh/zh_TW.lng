@@ -1,6 +1,6 @@
 :DOSBOX-X:LANGUAGE:Traditional Chinese
 :DOSBOX-X:CODEPAGE:950
-:DOSBOX-X:VERSION:2025.10.07
+:DOSBOX-X:VERSION:2026.01.02
 :DOSBOX-X:REMARK:設定好中文語言與字型後，就可以直接支援中文顯示和列印。國家和字碼頁選項可以留空，或設為「886,950」、「886,951」。譯者註：932 字碼頁的中文語言檔（用於 PC-98、JEGA、DOS/V）可至 https://github.com/1abcd/dosbox-x/issues/2 下載。
 :AUTOEXEC_CONFIGFILE_HELP
 區段中的指令行會在啟動時執行。
@@ -875,27 +875,27 @@ DOSBox-X 提供多程度的光碟機模擬.
 
 .
 :PROGRAM_BOOT_PRINT_ERROR
-此命令將使 DOSBox-X 從軟碟或硬碟映像開機.
+使 DOSBox-X 從軟碟 / PCjr 卡匣或硬碟映像開機.
 
-您可以在此命令中使用多個軟碟映像檔, 並可透過選單指令進行切換.
-"磁碟機:" 將從指定的已掛載的磁碟機開機. 如果沒有指定磁碟機代號,
-將預設從磁碟機 A: 開機. 如果沒有指定參數將試著從目前磁碟機開機.
-只支援從以下磁碟機代號開機: A:、C:、以及 D:. 如果要從硬碟機
-(C: 或 D:) 開機, 請保證映像檔已用 [34;1mIMGMOUNT[0m 命令掛載.
+[34;1mBOOT [磁碟機代號:|磁碟機編號] [-convertfat|-convertfatro|-noconvertfat][0m
+[34;1mBOOT floppyimg1.img [floppyimg2.img ...] [-E <命令>][0m
+[34;1mBOOT harddrive.img[0m
 
-此命令的語法為如下之一:
+  磁碟機代號      代號 A: 是軟碟機, 代號 C: 或 D: 是硬碟機.
+  磁碟機編號      編號 0 是軟碟機, 編號 2 或 3 是硬碟機.
+  (必須先用 [34;1mIMGMOUNT[0m 命令掛載好磁碟機.)
+  floppyimg.img    指定一個或多個軟碟 / PCjr 映像來開機.
+                   指定多個映像檔來為磁碟機 A: 建立切換清單.
+  harddrive.img    指定單個硬碟映像來從磁碟機 C: 開機.
+  增加一個前導字元冒號 (:) 使映像檔變為防寫.
 
-[34;1mBOOT [磁碟機代號:] [-convertfat|-convertfatro|-noconvertfat][0m
-
-[34;1mBOOT diskimg1.img [diskimg2.img ...] [-L 磁碟機代號][0m
-
-附註: 如果啟用了 "leading colon write protect image" 組態選項,
-      前導字元冒號 (:) 帶頭的映像檔, 將會以防寫模式開機.
+  [-E <命令>]     為 PCjr 卡匣映像指定一個命令字串.
+  [-L 磁碟機代號] 可忽略的選項, 僅為了相容性而支援.
 
 舉例:
-
-[32;1mBOOT A:[0m       - 從磁碟機 A: 開機, 如果此磁碟機已掛載並能開機.
-[32;1mBOOT :DOS.IMG[0m - 以防寫模式從軟碟映像檔 DOS.IMG 開機.
+[32;1mBOOT A:[0m        從磁碟機 A: 開機, 如果此磁碟機已掛載並能開機.
+[32;1mBOOT disk1.img disk2.img[0m 使用在磁碟機 A: 的切換清單, 從多個軟碟映像檔開機.
+[32;1mBOOT :DOS.IMG[0m  以防寫模式從軟碟映像檔 DOS.IMG 開機.
 
 .
 :PROGRAM_BOOT_UNABLE
@@ -2384,6 +2384,9 @@ DEBUGBOX [命令] [選項]
 .
 :MENU:mapper_shutdown
 結束 DOSBox-X
+.
+:MENU:mapper_capkeyboard
+擷取鍵盤
 .
 :MENU:mapper_capmouse
 擷取滑鼠
@@ -3921,7 +3924,7 @@ D88 映像檔似乎是用於 PC-88, 不能用它來開機.
 START [+|-|_] 命令 [引數]
 
   [+|-|_]: 最大化/最小化/隱藏 程式.
-  也接受 /MAX, /MIN, /HID 選項.
+  也支援 /MAX, /MIN, /HID 選項.
   命令: 要啟動的命令、程式、或檔案.
   引數: 傳遞給應用程式的引數.
   
@@ -4247,7 +4250,7 @@ COLOR [屬性]
 如果嘗試執行帶有相同前景和背景色彩的 COLOR 命令,
 ERRORLEVEL 會被 COLOR 命令設定為 1.
 
-舉例: "COLOR fc" 命令會產生亮白色為底的淺紅色字.
+舉例: "COLOR fc" 命令產生出亮白色為底的淺紅色.
 
 .
 :ERROR
