@@ -894,7 +894,7 @@ DOSBox-X 提供多程度的光碟機模擬.
 
 舉例:
 [32;1mBOOT A:[0m                  從磁碟機 A: 開機, 如果此磁碟機已掛載並能開機.
-[32;1mBOOT disk1.img disk2.img[0m 使用在磁碟機 A: 建立的切換清單以從多個軟碟映像檔開機.
+[32;1mBOOT disk1.img disk2.img[0m 使用在磁碟機 A: 建立的切換清單來從多個軟碟映像檔開機.
 [32;1mBOOT :DOS.IMG[0m            以防寫模式從軟碟映像檔 DOS.IMG 開機.
 
 .
