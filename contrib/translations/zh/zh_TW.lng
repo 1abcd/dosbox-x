@@ -50,6 +50,9 @@ DOSBox-X 組態工具
 :CLOSE
 關閉
 .
+:THEME
+色彩主題
+.
 :DEBUGCMD
 輸入偵錯工具命令
 .
@@ -4495,4 +4498,19 @@ Raw OPL 的輸出已存檔:
 螢幕抓圖已存檔:
 
 %s
+.
+:HELP_ABOUT_VERSION
+DOSBox-X 版本 %s (%s %s %s-bit)%s
+.
+:HELP_ABOUT_UPDATED
+組建日期和時間: %s
+.
+:HELP_ABOUT_COPYRIGHT
+著作權 %s-%s %s
+.
+:HELP_ABOUT_MAINTAINER
+專案維護者: %s
+.
+:HELP_ABOUT_HOMEPAGE
+DOSBox-X 專案首頁: %s
 .
