@@ -4500,7 +4500,7 @@ Raw OPL 的輸出已存檔:
 %s
 .
 :HELP_ABOUT_VERSION
-DOSBox-X 版本 %s (%s %s %s-bit)%s
+DOSBox-X 版本 %s (%s %s %s位元)%s
 .
 :HELP_ABOUT_UPDATED
 組建日期和時間: %s
